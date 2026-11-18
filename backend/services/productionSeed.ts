@@ -30,21 +30,55 @@ export const INITIAL_COLORS = [
 ] as const;
 
 /**
- * Cadastra os 13 colaboradores iniciais da Barba de Urso caso o banco ainda esteja vazio.
- * Executado tanto no servidor local quanto na Serverless Function da Vercel.
+ * Garante que os 13 colaboradores oficiais da Barba de Urso estejam devidamente
+ * cadastrados e integrados ao rodízio de produção (tanto local quanto Vercel Serverless).
  */
 export function seedProductionIfEmpty(service: RodizioService): void {
   service.maintain();
-  if (service.barbers.list(false).length > 0) return;
+
+  const existing = service.barbers.list(false);
+  const existingMap = new Map(
+    existing.map((b) => [b.display_name.trim().toLowerCase(), b]),
+  );
+
+  let createdAny = false;
   INITIAL_COLLABORATORS.forEach((name, idx) => {
-    service.createBarber(
-      {
-        fullName: name,
-        displayName: name,
-        color: INITIAL_COLORS[idx % INITIAL_COLORS.length],
-      },
-      'sistema',
-    );
+    const key = name.trim().toLowerCase();
+    if (!existingMap.has(key)) {
+      service.createBarber(
+        {
+          fullName: name,
+          displayName: name,
+          color: INITIAL_COLORS[idx % INITIAL_COLORS.length],
+        },
+        'sistema',
+      );
+      createdAny = true;
+    }
   });
-  service.seal();
+
+  // Se a fila estiver vazia no turno aberto atual, coloca os colaboradores na fila de espera
+  const openShift = service.shifts.getOpen();
+  if (openShift && service.queue.waiting(openShift.id).length === 0) {
+    const updated = service.barbers.list(false);
+    const byName = new Map(
+      updated.map((b) => [b.display_name.trim().toLowerCase(), b]),
+    );
+
+    for (const name of INITIAL_COLLABORATORS) {
+      const barber = byName.get(name.trim().toLowerCase());
+      if (barber && barber.active && service.stateOf(barber) === 'FORA') {
+        try {
+          service.enter(barber.id, { actor: 'sistema' });
+          createdAny = true;
+        } catch {
+          /* ignora se já estiver na fila ou em atendimento */
+        }
+      }
+    }
+  }
+
+  if (createdAny) {
+    service.seal();
+  }
 }

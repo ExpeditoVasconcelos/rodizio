@@ -238,7 +238,7 @@ export class RodizioService {
     return b;
   }
 
-  private stateOf(b: BarberRow): BarberState {
+  stateOf(b: BarberRow): BarberState {
     return deriveState({
       hasActiveAttendance: !!this.attendances.activeFor(b.id),
       isWaiting: !!this.queue.waitingFor(b.id),

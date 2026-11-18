@@ -126,7 +126,12 @@ export default function AdminPage() {
       <main className="min-w-0 flex-1 overflow-y-auto bg-white p-6 lg:p-8">
         <div className="mx-auto max-w-5xl">
           {tab === 'live' && <ReceptionLiveTab snapshot={snapshot} />}
-          {tab === 'barbers' && <BarbersTab onInspectHistory={inspectBarberHistory} />}
+          {tab === 'barbers' && (
+            <BarbersTab
+              onInspectHistory={inspectBarberHistory}
+              snapshotVersion={snapshot?.version}
+            />
+          )}
           {tab === 'history' && <HistoryTab initialBarberId={historyBarberId} />}
           {tab === 'system' && <SystemTab />}
         </div>

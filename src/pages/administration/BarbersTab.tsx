@@ -1,4 +1,4 @@
-import { Camera, Check, Edit3, History, Plus, Power, Trash2 } from 'lucide-react';
+import { Camera, Check, Edit3, History, Plus, Power, RefreshCw, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { AdminBarber } from '../../../shared/types';
 import { Avatar } from '../../components/ui/Avatar';
@@ -9,7 +9,13 @@ import { pushToast } from '../../hooks/toasts';
 import { adminApi, imageToDataUrl } from '../../services/admin/adminService';
 import { ApiError } from '../../services/http';
 
-export function BarbersTab({ onInspectHistory }: { onInspectHistory: (barberId: number) => void }) {
+export function BarbersTab({
+  onInspectHistory,
+  snapshotVersion,
+}: {
+  onInspectHistory: (barberId: number) => void;
+  snapshotVersion?: number;
+}) {
   const [barbers, setBarbers] = useState<AdminBarber[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -36,7 +42,7 @@ export function BarbersTab({ onInspectHistory }: { onInspectHistory: (barberId: 
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, snapshotVersion]);
 
   const openNew = () => {
     setEditing(null);
@@ -136,15 +142,26 @@ export function BarbersTab({ onInspectHistory }: { onInspectHistory: (barberId: 
           </p>
         </div>
 
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={openNew}
-          icon={<Plus size={15} />}
-          data-testid="admin-new-barber-btn"
-        >
-          Novo profissional
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => void load()}
+            icon={<RefreshCw size={14} className={loading ? 'animate-spin' : ''} />}
+            title="Atualizar lista"
+          >
+            Atualizar
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={openNew}
+            icon={<Plus size={15} />}
+            data-testid="admin-new-barber-btn"
+          >
+            Novo profissional
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -152,9 +169,14 @@ export function BarbersTab({ onInspectHistory }: { onInspectHistory: (barberId: 
       ) : barbers.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-200 p-10 text-center">
           <p className="text-sm font-semibold text-zinc-700">Nenhum profissional cadastrado.</p>
-          <Button size="sm" variant="primary" onClick={openNew} icon={<Plus size={15} />} className="mt-4">
-            Cadastrar profissional
-          </Button>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <Button size="sm" variant="secondary" onClick={() => void load()} icon={<RefreshCw size={14} />}>
+              Atualizar lista
+            </Button>
+            <Button size="sm" variant="primary" onClick={openNew} icon={<Plus size={15} />}>
+              Cadastrar profissional
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
