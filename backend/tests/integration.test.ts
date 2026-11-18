@@ -67,7 +67,7 @@ describe('TESTE 7 — interrupção e recuperação', () => {
 });
 
 describe('Contexto de produção e cabeçalhos de segurança', () => {
-  it('inicializa com nome Barba de Urso em modo oficial de produção', () => {
+  it('inicializa com nome Barba de Urso e os 13 colaboradores pré-cadastrados', () => {
     const dir = tmp();
     const ctx = new AppContext(
       loadConfig({
@@ -80,6 +80,10 @@ describe('Contexto de produção e cabeçalhos de segurança', () => {
     ctx.start();
     assert.equal(ctx.currentMode(), 'real');
     assert.equal(ctx.settings().shopName, 'Barba de Urso');
+    const names = ctx.current().barbers.list().map((b) => b.display_name);
+    assert.equal(names.length, 13);
+    assert.ok(names.includes('Severino'));
+    assert.ok(names.includes('Diogo'));
     ctx.close();
   });
 });

@@ -3,47 +3,9 @@ import { loadConfig } from './config.js';
 import { startServer } from './server.js';
 import { AppContext } from './services/appContext.js';
 
-const INITIAL_COLLABORATORS = [
-  'Severino',
-  'Bruno',
-  'Felipe',
-  'Calvinho',
-  'Israel',
-  'Mateus',
-  'Izaiane',
-  'Daniel',
-  'Gerson',
-  'Tainãn',
-  'Carlos',
-  'Raul',
-  'Diogo',
-];
-
-const INITIAL_COLORS = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#f43f5e',
-  '#8b5cf6',
-  '#22c55e',
-  '#06b6d4',
-  '#f97316',
-  '#6366f1',
-  '#ec4899',
-];
-
 async function main(): Promise<void> {
   const config = loadConfig();
   const ctx = new AppContext(config);
-  const realSvc = ctx.realService();
-  if (realSvc.barbers.list().length === 0) {
-    INITIAL_COLLABORATORS.forEach((name, idx) => {
-      realSvc.createBarber(
-        { fullName: name, displayName: name, color: INITIAL_COLORS[idx % INITIAL_COLORS.length] },
-        'sistema',
-      );
-    });
-  }
   const report = ctx.start();
   if (report.integrity !== 'ok') {
     console.error(`\n[ATENÇÃO] Verificação de integridade do banco: ${report.integrity}`);
@@ -101,4 +63,3 @@ async function main(): Promise<void> {
 }
 
 void main();
-

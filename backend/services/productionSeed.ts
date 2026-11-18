@@ -1,28 +1,50 @@
 import type { RodizioService } from './rodizioService.js';
 
-export interface InitialCollaborator {
-  fullName: string;
-  displayName: string;
-  color: string;
-}
+export const INITIAL_COLLABORATORS = [
+  'Severino',
+  'Bruno',
+  'Felipe',
+  'Calvinho',
+  'Israel',
+  'Mateus',
+  'Izaiane',
+  'Daniel',
+  'Gerson',
+  'Tainãn',
+  'Carlos',
+  'Raul',
+  'Diogo',
+] as const;
+
+export const INITIAL_COLORS = [
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#f43f5e',
+  '#8b5cf6',
+  '#22c55e',
+  '#06b6d4',
+  '#f97316',
+  '#6366f1',
+  '#ec4899',
+] as const;
 
 /**
- * Colaboradores iniciais cadastrados automaticamente em produção quando o banco
- * é inicializado pela primeira vez.
+ * Cadastra os 13 colaboradores iniciais da Barba de Urso caso o banco ainda esteja vazio.
+ * Executado tanto no servidor local quanto na Serverless Function da Vercel.
  */
-export const PRODUCTION_COLLABORATORS: InitialCollaborator[] = [];
-
 export function seedProductionIfEmpty(service: RodizioService): void {
   service.maintain();
   if (service.barbers.list(false).length > 0) return;
-  for (const c of PRODUCTION_COLLABORATORS) {
-    const created = service.createBarber(
-      { fullName: c.fullName, displayName: c.displayName, color: c.color },
+  INITIAL_COLLABORATORS.forEach((name, idx) => {
+    service.createBarber(
+      {
+        fullName: name,
+        displayName: name,
+        color: INITIAL_COLORS[idx % INITIAL_COLORS.length],
+      },
       'sistema',
     );
-    service.enter(created.id, { actor: 'sistema' });
-  }
-  if (PRODUCTION_COLLABORATORS.length > 0) {
-    service.seal();
-  }
+  });
+  service.seal();
 }
