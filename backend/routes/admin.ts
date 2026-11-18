@@ -39,19 +39,19 @@ function dayStart(value: unknown, plusDays = 0): number | undefined {
 export function adminRouter(ctx: AppContext): Router {
   const r = Router();
 
-  r.post('/login', (req, res) => {
+  r.post('/login', async (req, res) => {
     const ip = req.ip ?? 'desconhecido';
-    res.json({ ok: true, ...ctx.auth.login(String(req.body?.pin ?? ''), ip) });
+    res.json({ ok: true, ...(await ctx.auth.login(String(req.body?.pin ?? ''), ip)) });
   });
 
   r.use(requireAdmin(ctx));
 
-  r.get('/session', (_req, res) => {
-    res.json({ ok: true, mustChangePin: ctx.auth.mustChangePin });
+  r.get('/session', async (_req, res) => {
+    res.json({ ok: true, mustChangePin: await ctx.auth.isMustChangePin() });
   });
 
-  r.post('/pin', (req, res) => {
-    ctx.auth.changePin(String(req.body?.currentPin ?? ''), String(req.body?.newPin ?? ''));
+  r.post('/pin', async (req, res) => {
+    await ctx.auth.changePin(String(req.body?.currentPin ?? ''), String(req.body?.newPin ?? ''));
     res.json({ ok: true });
   });
 

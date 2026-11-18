@@ -19,29 +19,46 @@ function verifyPin(pin: string, stored: string): boolean {
   return crypto.timingSafeEqual(actual, expected);
 }
 
-/** Controle básico de acesso: PIN da recepção (hash scrypt) + token assinado (HMAC). */
+function safeEqual(a: string, b: string): boolean {
+  const ha = crypto.createHash('sha256').update(a).digest();
+  const hb = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
+/** Armazenamento persistente remoto (Supabase) — necessário em ambiente Serverless (Vercel). */
+export interface RemoteSettings {
+  getSetting(key: string): Promise<string | undefined>;
+  setSetting(key: string, value: string): Promise<void>;
+}
+
+/**
+ * Controle de acesso: PIN da recepção (hash scrypt) + token assinado (HMAC).
+ * Com Supabase, o hash do PIN fica no banco e o segredo da sessão é derivado de uma chave
+ * estável, de modo que o login vale para QUALQUER instância Serverless.
+ */
 export class AuthService {
   private secret: Buffer;
   private attempts = new Map<string, { count: number; blockedUntil: number }>();
 
   constructor(
     private system: SystemRepository,
-    initialPin: string,
+    private initialPin: string,
+    private remote?: RemoteSettings,
+    secretSeed?: string,
   ) {
-    let secret = process.env.SESSION_SECRET ?? system.getSetting('session_secret');
-    if (!secret) {
-      if (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        secret = crypto
-          .createHash('sha256')
-          .update(process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '')
-          .digest('hex');
-      } else {
-        secret = crypto.randomBytes(32).toString('hex');
-      }
-      system.setSetting('session_secret', secret);
+    let secret = process.env.SESSION_SECRET;
+    if (!secret && remote && secretSeed) {
+      secret = crypto.createHash('sha256').update(`barba-de-urso:session:${secretSeed}`).digest('hex');
     }
-    this.secret = Buffer.from(secret, 'hex');
-    if (!system.findUser(ADMIN_ID)) {
+    if (!secret) {
+      secret = system.getSetting('session_secret');
+      if (!secret) {
+        secret = crypto.randomBytes(32).toString('hex');
+        system.setSetting('session_secret', secret);
+      }
+    }
+    this.secret = crypto.createHash('sha256').update(secret).digest();
+    if (!remote && !system.findUser(ADMIN_ID)) {
       system.insertUser('Recepção', 'ADMIN', ADMIN_ID, hashPin(initialPin), Date.now());
       // Pede troca do PIN se estiver usando o padrão.
       system.setSetting('must_change_pin', initialPin === '1234' ? '1' : '0');
@@ -52,14 +69,29 @@ export class AuthService {
     return this.system.getSetting('must_change_pin') === '1';
   }
 
-  login(pin: string, ip: string): { token: string; expiresAt: number; mustChangePin: boolean } {
+  async isMustChangePin(): Promise<boolean> {
+    if (!this.remote) return this.mustChangePin;
+    const flag = await this.remote.getSetting('must_change_pin');
+    if (flag !== undefined) return flag === '1';
+    return this.initialPin === '1234';
+  }
+
+  private async checkPin(pin: string): Promise<boolean> {
+    const given = String(pin ?? '');
+    if (!this.remote) {
+      const user = this.system.findUser(ADMIN_ID);
+      return !!user && verifyPin(given, user.pin_hash);
+    }
+    const stored = await this.remote.getSetting('admin_pin_hash');
+    if (stored) return verifyPin(given, stored);
+    return safeEqual(given, this.initialPin);
+  }
+
+  async login(pin: string, ip: string): Promise<{ token: string; expiresAt: number; mustChangePin: boolean }> {
     const now = Date.now();
     const rec = this.attempts.get(ip);
     if (rec && rec.blockedUntil > now) throw new AppError('TOO_MANY_ATTEMPTS');
-    const user = this.system.findUser(ADMIN_ID);
-    const envPin = process.env.ADMIN_PIN || '1234';
-    const isValid = (user && verifyPin(String(pin ?? ''), user.pin_hash)) || String(pin ?? '') === envPin;
-    if (!isValid) {
+    if (!(await this.checkPin(pin))) {
       const count = (rec?.count ?? 0) + 1;
       this.attempts.set(ip, { count, blockedUntil: count >= 5 ? now + 30_000 : 0 });
       if (count >= 5) this.attempts.set(ip, { count: 0, blockedUntil: now + 30_000 });
@@ -67,14 +99,22 @@ export class AuthService {
     }
     this.attempts.delete(ip);
     const expiresAt = now + SESSION_HOURS * 3600_000;
-    return { token: this.sign({ sub: ADMIN_ID, exp: expiresAt }), expiresAt, mustChangePin: this.mustChangePin };
+    return {
+      token: this.sign({ sub: ADMIN_ID, exp: expiresAt }),
+      expiresAt,
+      mustChangePin: await this.isMustChangePin(),
+    };
   }
 
-  changePin(currentPin: string, newPin: string): void {
-    const user = this.system.findUser(ADMIN_ID);
-    if (!user || !verifyPin(String(currentPin ?? ''), user.pin_hash)) throw new AppError('BAD_PIN');
+  async changePin(currentPin: string, newPin: string): Promise<void> {
+    if (!(await this.checkPin(currentPin))) throw new AppError('BAD_PIN');
     if (!/^\d{4,12}$/.test(String(newPin ?? ''))) {
       throw new AppError('BAD_REQUEST', 'O NOVO PIN DEVE TER DE 4 A 12 DÍGITOS.');
+    }
+    if (this.remote) {
+      await this.remote.setSetting('admin_pin_hash', hashPin(newPin));
+      await this.remote.setSetting('must_change_pin', '0');
+      return;
     }
     this.system.updatePin(ADMIN_ID, hashPin(newPin));
     this.system.setSetting('must_change_pin', '0');
@@ -105,4 +145,3 @@ export class AuthService {
     return `${body}.${sig}`;
   }
 }
-

@@ -87,6 +87,15 @@ export class SupabaseRodizioService {
     return false;
   }
 
+  async getSetting(key: string): Promise<string | undefined> {
+    const { data } = await this.client.from('system_settings').select('value').eq('key', key).maybeSingle();
+    return data?.value ?? undefined;
+  }
+
+  async setSetting(key: string, value: string): Promise<void> {
+    await this.client.from('system_settings').upsert({ key, value });
+  }
+
   async seal(): Promise<void> {
     await this.client.from('audit_logs').update({ undoable: 0 }).eq('undoable', 1);
   }

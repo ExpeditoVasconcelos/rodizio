@@ -39,13 +39,12 @@ export class AppContext {
       this.system.setSetting('shop_name', 'Barba de Urso');
     }
     this.system.setSetting('mode', 'real');
-    this.auth = new AuthService(this.system, config.initialAdminPin);
-    this.real = this.createService(this.file('rodizio.db'));
-    seedProductionIfEmpty(this.real);
-
     if (config.supabaseUrl && config.supabaseSecretKey) {
       this.supabase = new SupabaseRodizioService(config, () => this.emit());
     }
+    this.auth = new AuthService(this.system, config.initialAdminPin, this.supabase, config.supabaseSecretKey);
+    this.real = this.createService(this.file('rodizio.db'));
+    seedProductionIfEmpty(this.real);
   }
 
   start(): { integrity: string; fixes: string[] } {
