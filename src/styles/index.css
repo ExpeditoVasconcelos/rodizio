@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/700.css';
+
+@theme {
+  --font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Paleta fria, monocromática (branco, preto e escalas de cinza) */
+  --color-ink-950: #ffffff;
+  --color-ink-900: #fafafa;
+  --color-ink-850: #ffffff;
+  --color-ink-800: #f4f4f5;
+  --color-ink-700: #e4e4e7;
+  --color-ink-600: #d4d4d8;
+  --color-ink-500: #71717a;
+
+  --color-brass-300: #52525b;
+  --color-brass-400: #27272a;
+  --color-brass-500: #18181b;
+  --color-brass-600: #09090b;
+
+  /* Acentos mínimos para os dois quadros */
+  --color-queue: #18181b;
+  --color-work: #18181b;
+  --color-rest: #52525b;
+  --color-off: #a1a1aa;
+  --color-danger: #dc2626;
+
+  --ease-board: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: #09090b;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  button {
+    cursor: pointer;
+    font: inherit;
+    touch-action: manipulation;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.scroll-y {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 transparent;
+}
+.scroll-x {
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+.draggable-card {
+  touch-action: manipulation;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.animate-shake {
+  animation: shake 0.38s var(--ease-board);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.24s var(--ease-board) both;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Campos de formulário limpos, sem brilho neon */
+.field {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #d4d4d8;
+  background: #ffffff;
+  padding: 0.625rem 0.8rem;
+  color: #09090b;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field:focus {
+  border-color: #09090b;
+}

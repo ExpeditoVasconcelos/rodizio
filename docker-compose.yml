@@ -1,0 +1,15 @@
+services:
+  rodizio:
+    build: .
+    container_name: rodizio-barbearia
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATA_DIR=/app/data
+      - ADMIN_PIN=${ADMIN_PIN:-1234}
+    volumes:
+      - ./data:/app/data
+

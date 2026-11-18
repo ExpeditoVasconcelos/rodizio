@@ -1,0 +1,51 @@
+{
+  "name": "rodizio-barbearia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quadro digital de rodízio para barbearias — servidor local no notebook da recepção e painel touchscreen para o tablet dos barbeiros.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "tsx watch --disable-warning=ExperimentalWarning backend/index.ts",
+    "dev:client": "vite",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "tsc -p tsconfig.json --noEmit && vite build",
+    "build:server": "tsc -p tsconfig.server.json",
+    "start": "node --disable-warning=ExperimentalWarning dist/server/backend/index.js",
+    "backup": "node --disable-warning=ExperimentalWarning dist/server/backend/cli/backup.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "test": "node --import tsx --disable-warning=ExperimentalWarning --test --test-concurrency=1 backend/tests/*.test.ts",
+    "test:e2e": "node --import tsx --disable-warning=ExperimentalWarning e2e/touch-drag.e2e.ts"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "express": "^5.3.0",
+    "framer-motion": "^14.14.0",
+    "lucide-react": "^1.73.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "tailwindcss": "^4.3.5",
+    "ws": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ws": "^8.18.2",
+    "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
+    "playwright-core": "^1.65.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}
