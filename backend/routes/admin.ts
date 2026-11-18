@@ -57,14 +57,14 @@ export function adminRouter(ctx: AppContext): Router {
 
   /* ------------------------------ sistema ------------------------------ */
 
-  r.get('/system', (_req, res) => {
+  r.get('/system', async (_req, res) => {
     const s = ctx.settings();
     const info: SystemInfo = {
       mode: ctx.currentMode(),
       port: ctx.config.port,
       host: ctx.config.host,
-      addresses: listLanAddresses(ctx.config.port),
-      mustChangePin: ctx.auth.mustChangePin,
+      addresses: process.env.VERCEL ? [] : listLanAddresses(ctx.config.port),
+      mustChangePin: await ctx.auth.isMustChangePin(),
       nodeVersion: process.version,
       uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
       settings: s,

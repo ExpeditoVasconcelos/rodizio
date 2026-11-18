@@ -108,8 +108,13 @@ export function SystemTab() {
     }
   };
 
+  // O endereço acompanha automaticamente o domínio/IP em que o sistema está aberto
+  // (Vercel, domínio próprio, IP da rede local...). Só em "localhost" usa o IP da rede,
+  // para que o QR Code funcione no celular.
+  const isLocalhost = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(location.hostname);
   const primaryLan = info?.addresses[0];
-  const tabletUrl = primaryLan ? `${primaryLan.url}/painel` : `${location.origin}/painel`;
+  const baseUrl = isLocalhost && primaryLan ? primaryLan.url : location.origin;
+  const tabletUrl = `${baseUrl}/painel`;
 
   const copyUrl = async (text: string) => {
     try {
