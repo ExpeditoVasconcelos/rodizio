@@ -61,7 +61,7 @@ export default function AdminPage() {
                 {snapshot?.shop.name ?? 'Barba de Urso'}
               </div>
               <div className="text-[0.68rem] font-medium text-zinc-400">
-                Recepção {snapshot?.mode === 'demo' ? '· Demo' : ''}
+                Recepção
               </div>
             </div>
           </div>

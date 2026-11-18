@@ -1,4 +1,4 @@
-import { Maximize2, Menu, Minimize2, Plus, RotateCcw } from 'lucide-react';
+import { Maximize2, Menu, Minimize2, Plus } from 'lucide-react';
 import type { StateSnapshot } from '../../../shared/types';
 import { formatClock } from '../../domain/format';
 import type { ConnectionStatus } from '../../services/connection/store';
@@ -17,7 +17,6 @@ interface Props {
   onOpenAvailable: () => void;
   onToggleFullscreen: () => void;
   onMenu: () => void;
-  onResetDemo?: () => void;
 }
 
 /** Barra superior mínima: logo Barba de Urso, alternância de tema (escuro/claro) e controles essenciais. */
@@ -32,7 +31,6 @@ export function Header({
   onOpenAvailable,
   onToggleFullscreen,
   onMenu,
-  onResetDemo,
 }: Props) {
   const iconBtn =
     'grid h-8 w-8 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900';
@@ -43,25 +41,6 @@ export function Header({
       <div className="truncate text-xs font-bold tracking-[0.14em] text-zinc-900 uppercase">
         {snapshot?.shop.name ?? 'BARBA DE URSO'}
       </div>
-
-      {snapshot?.mode === 'demo' && (
-        <div className="flex items-center gap-1.5">
-          <span className="rounded bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-600 uppercase">
-            Demo
-          </span>
-          {onResetDemo && (
-            <button
-              type="button"
-              onClick={onResetDemo}
-              data-testid="header-reset-demo"
-              className="inline-flex items-center gap-1 rounded border border-zinc-200 bg-white px-2 py-0.5 text-[0.65rem] font-medium text-zinc-700 hover:bg-zinc-50"
-            >
-              <RotateCcw size={11} />
-              Reiniciar
-            </button>
-          )}
-        </div>
-      )}
 
       <div className="flex-1" />
 

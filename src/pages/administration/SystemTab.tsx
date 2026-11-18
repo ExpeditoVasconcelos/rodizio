@@ -3,7 +3,6 @@ import {
   Copy,
   Database,
   Download,
-  RotateCcw,
   Save,
   Trash2,
 } from 'lucide-react';
@@ -106,24 +105,6 @@ export function SystemTab() {
       pushToast('error', err instanceof ApiError ? err.message : 'Falha ao criar backup.');
     } finally {
       setBackupBusy(false);
-    }
-  };
-
-  const handleSwitchMode = async (mode: 'real' | 'demo') => {
-    try {
-      await adminApi.setMode(mode);
-      await load();
-    } catch (err) {
-      pushToast('error', err instanceof ApiError ? err.message : 'Falha ao alterar modo.');
-    }
-  };
-
-  const handleResetDemo = async () => {
-    try {
-      await adminApi.resetDemo();
-      pushToast('success', 'Demonstração reiniciada.');
-    } catch (err) {
-      pushToast('error', err instanceof ApiError ? err.message : 'Falha ao reiniciar demonstração.');
     }
   };
 
@@ -241,41 +222,14 @@ export function SystemTab() {
           </form>
         </section>
 
-        {/* Modo de operação e PIN */}
-        <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-5">
-          <div>
-            <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">
-              Modo de operação
-            </h2>
-            <p className="mt-1 text-xs text-zinc-500">
-              alterne entre o banco oficial e o banco de demonstração.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant={info?.mode === 'real' ? 'primary' : 'secondary'}
-                onClick={() => void handleSwitchMode('real')}
-              >
-                Operação real
-              </Button>
-              <Button
-                size="sm"
-                variant={info?.mode === 'demo' ? 'primary' : 'secondary'}
-                onClick={() => void handleSwitchMode('demo')}
-              >
-                Demonstração
-              </Button>
-              <Button size="sm" variant="ghost" onClick={handleResetDemo} icon={<RotateCcw size={13} />}>
-                Reiniciar demo
-              </Button>
-            </div>
-          </div>
-
-          <hr className="border-zinc-200" />
-
+        {/* Segurança / PIN */}
+        <section className="rounded-xl border border-zinc-200 bg-white p-5">
           <form onSubmit={handleChangePin} className="space-y-3">
             <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">Alterar PIN da recepção</h2>
-            <div className="grid grid-cols-2 gap-2.5">
+            <p className="text-xs text-zinc-500">
+              Proteja o acesso às configurações administrativas e controles da recepção.
+            </p>
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-zinc-600">PIN atual</label>
                 <input

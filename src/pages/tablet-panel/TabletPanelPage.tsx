@@ -13,7 +13,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import { LayoutGroup } from 'framer-motion';
-import { Home, Loader2, Lock, Maximize2, Minimize2, RefreshCw, RotateCcw, WifiOff } from 'lucide-react';
+import { Home, Loader2, Lock, Maximize2, Minimize2, RefreshCw, WifiOff } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ApiOk, BarberView } from '../../../shared/types';
@@ -39,7 +39,6 @@ import { useOperations } from '../../hooks/useOperations';
 import { useRodizio } from '../../hooks/useRodizio';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { attendanceService } from '../../services/attendance/attendanceService';
-import { demoService } from '../../services/demo/demoService';
 import { queueService } from '../../services/queue/queueService';
 
 const collision: CollisionDetection = (args) => {
@@ -87,15 +86,6 @@ export default function TabletPanelPage() {
   const active = activeId !== null ? byId.get(activeId) ?? null : null;
 
   const run = useCallback((id: number, fn: () => Promise<ApiOk>) => void ops.run(id, fn), [ops]);
-
-  const handleResetDemo = useCallback(async () => {
-    try {
-      await demoService.reset();
-      pushToast('success', 'Demonstração reiniciada.');
-    } catch {
-      pushToast('error', 'Não foi possível reiniciar a demonstração.');
-    }
-  }, []);
 
   /* ----------------------------- arrastar e soltar ----------------------------- */
 
@@ -218,7 +208,6 @@ export default function TabletPanelPage() {
         onOpenAvailable={() => setAvailableOpen(true)}
         onToggleFullscreen={toggleFullscreen}
         onMenu={() => setPanelMenu(true)}
-        onResetDemo={snapshot?.mode === 'demo' ? handleResetDemo : undefined}
       />
 
       {offline && (
@@ -324,19 +313,6 @@ export default function TabletPanelPage() {
               }}
             >
               {fs.isFullscreen ? 'Sair da tela cheia' : 'Entrar em tela cheia'}
-            </Button>
-          )}
-          {snapshot?.mode === 'demo' && (
-            <Button
-              size="md"
-              variant="secondary"
-              icon={<RotateCcw size={16} />}
-              onClick={() => {
-                setPanelMenu(false);
-                void handleResetDemo();
-              }}
-            >
-              Reiniciar demonstração
             </Button>
           )}
           <ThemeToggle showLabel className="w-full justify-center border border-zinc-300 py-2.5" />

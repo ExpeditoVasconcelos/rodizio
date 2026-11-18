@@ -53,7 +53,7 @@ export default function LandingPage() {
                 {snapshot?.shop.name ?? 'Barba de Urso'}
               </div>
               <div className="text-[0.68rem] font-medium text-zinc-400">
-                Sistema de Rodízio {snapshot?.mode === 'demo' ? '· Demonstração' : ''}
+                Sistema de Rodízio
               </div>
             </div>
           </div>
@@ -131,20 +131,20 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Recepção e Demonstração */}
+          {/* Recepção e Administração */}
           <div className="flex flex-col gap-4 md:col-span-5">
-            <div className="flex flex-1 flex-col justify-between rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5">
+            <div className="flex flex-1 flex-col justify-between rounded-2xl border border-zinc-200 bg-zinc-50/60 p-6">
               <div>
                 <div className="text-[0.68rem] font-bold tracking-[0.14em] text-zinc-400 uppercase">
                   Computador
                 </div>
-                <h2 className="mt-1 text-base font-bold text-zinc-900">Recepção e Administração</h2>
-                <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                <h2 className="mt-2 text-lg font-bold text-zinc-900">Recepção e Administração</h2>
+                <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
                   Gerencie colaboradores, direcione clientes, consulte o histórico e faça backups locais.
                 </p>
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
                 <Button
                   size="md"
                   variant="secondary"
@@ -162,30 +162,6 @@ export default function LandingPage() {
                   className="border border-zinc-200 bg-white"
                 >
                   QR Code
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex flex-1 flex-col justify-between rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5">
-              <div>
-                <div className="text-[0.68rem] font-bold tracking-[0.14em] text-zinc-400 uppercase">
-                  Simulação
-                </div>
-                <h2 className="mt-1 text-base font-bold text-zinc-900">Modo Demonstração</h2>
-                <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-                  Ambiente separado com 6 barbeiros fictícios para testar o funcionamento sem afetar dados reais.
-                </p>
-              </div>
-
-              <div className="mt-4">
-                <Button
-                  size="md"
-                  variant="secondary"
-                  onClick={() => navigate('/demo')}
-                  data-testid="landing-enter-demo"
-                  className="w-full"
-                >
-                  Abrir demonstração
                 </Button>
               </div>
             </div>
