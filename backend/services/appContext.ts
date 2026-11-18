@@ -9,6 +9,7 @@ import { SystemRepository } from '../repositories/systemRepository.js';
 import { AuthService } from './authService.js';
 import { seedProductionIfEmpty } from './productionSeed.js';
 import { RodizioService, type RodizioSettings } from './rodizioService.js';
+import { SupabaseRodizioService } from './supabaseRodizioService.js';
 
 export type ChangeListener = () => void;
 
@@ -19,6 +20,7 @@ export type ChangeListener = () => void;
 export class AppContext {
   readonly system: SystemRepository;
   readonly auth: AuthService;
+  readonly supabase?: SupabaseRodizioService;
   private systemDb: Db;
   private real: RodizioService;
   private listeners = new Set<ChangeListener>();
@@ -40,6 +42,10 @@ export class AppContext {
     this.auth = new AuthService(this.system, config.initialAdminPin);
     this.real = this.createService(this.file('rodizio.db'));
     seedProductionIfEmpty(this.real);
+
+    if (config.supabaseUrl && config.supabaseSecretKey) {
+      this.supabase = new SupabaseRodizioService(config, () => this.emit());
+    }
   }
 
   start(): { integrity: string; fixes: string[] } {
@@ -75,8 +81,8 @@ export class AppContext {
     return 'real';
   }
 
-  current(): RodizioService {
-    return this.real;
+  current(): RodizioService | SupabaseRodizioService {
+    return this.supabase ?? this.real;
   }
 
   realService(): RodizioService {

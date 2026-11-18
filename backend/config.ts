@@ -37,6 +37,9 @@ export interface AppConfig {
   initialAdminPin: string;
   backupEveryHours: number;
   backupKeep: number;
+  supabaseUrl: string;
+  supabaseSecretKey: string;
+  supabasePublishableKey: string;
 }
 
 export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
@@ -56,6 +59,9 @@ export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     initialAdminPin: process.env.ADMIN_PIN ?? '1234',
     backupEveryHours: int('BACKUP_EVERY_HOURS', 6),
     backupKeep: int('BACKUP_KEEP', 30),
+    supabaseUrl: process.env.SUPABASE_URL ?? 'https://vmsusvlwleahhcvupdtc.supabase.co',
+    supabaseSecretKey: process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+    supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? '',
     ...overrides,
   };
 }

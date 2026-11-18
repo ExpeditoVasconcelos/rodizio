@@ -1,4 +1,10 @@
 import type { StateSnapshot } from '../../../shared/types';
+import { createClient, type RealtimeChannel } from '@supabase/supabase-js';
+
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://vmsusvlwleahhcvupdtc.supabase.co';
+const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY || (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_yY0AE65u7o4Niduouta8Ug_I3gk7qOE';
+
+let supabaseChannel: RealtimeChannel | null = null;
 
 export type ConnectionStatus = 'connecting' | 'online' | 'offline';
 
@@ -134,9 +140,29 @@ export async function refreshState(): Promise<boolean> {
   }
 }
 
+function initSupabaseRealtime(): void {
+  try {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || supabaseChannel) return;
+    const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseChannel = client
+      .channel('barba-de-urso-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+        void refreshState();
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          rodizioStore.setStatus('online');
+        }
+      });
+  } catch {
+    /* fallback para http polling */
+  }
+}
+
 export function startConnection(): void {
   if (started) return;
   started = true;
+  initSupabaseRealtime();
   void refreshState();
   connect();
 

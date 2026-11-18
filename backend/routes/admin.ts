@@ -86,26 +86,26 @@ export function adminRouter(ctx: AppContext): Router {
 
   /* ------------------------------ barbeiros ------------------------------ */
 
-  r.get('/barbers', (_req, res) => {
-    res.json({ ok: true, barbers: ctx.current().adminBarbers() });
+  r.get('/barbers', async (_req, res) => {
+    res.json({ ok: true, barbers: await ctx.current().adminBarbers() });
   });
 
-  r.post('/barbers', (req, res) => {
+  r.post('/barbers', async (req, res) => {
     const b = req.body ?? {};
     const fullName = str(b.fullName, 'nome completo', 120);
     const displayName = str(b.displayName ?? fullName.split(' ')[0], 'nome de exibição', 30);
-    const created = ctx.current().createBarber({ fullName, displayName, color: color(b.color) }, 'recepcao');
+    const created = await ctx.current().createBarber({ fullName, displayName, color: color(b.color) }, 'recepcao');
     if (b.photoDataUrl) {
-      ctx.current().setBarberPhoto(created.id, ctx.saveImage(String(b.photoDataUrl), `barber-${created.id}`), 'recepcao');
+      await ctx.current().setBarberPhoto(created.id, ctx.saveImage(String(b.photoDataUrl), `barber-${created.id}`), 'recepcao');
     }
     res.json({ ok: true, id: created.id });
   });
 
-  r.put('/barbers/:id', (req, res) => {
+  r.put('/barbers/:id', async (req, res) => {
     const b = req.body ?? {};
     const barberId = id(req.params.id);
     const svc = ctx.current();
-    svc.updateBarber(
+    await svc.updateBarber(
       barberId,
       {
         fullName: str(b.fullName, 'nome completo', 120),
@@ -114,20 +114,19 @@ export function adminRouter(ctx: AppContext): Router {
       },
       'recepcao',
     );
-    if (b.removePhoto) svc.setBarberPhoto(barberId, null, 'recepcao');
+    if (b.removePhoto) await svc.setBarberPhoto(barberId, null, 'recepcao');
     else if (b.photoDataUrl) {
-      svc.setBarberPhoto(barberId, ctx.saveImage(String(b.photoDataUrl), `barber-${barberId}`), 'recepcao');
+      await svc.setBarberPhoto(barberId, ctx.saveImage(String(b.photoDataUrl), `barber-${barberId}`), 'recepcao');
     }
     if (typeof b.active === 'boolean') {
-      const current = svc.barbers.get(barberId);
-      if (current && !!current.active !== b.active) svc.setBarberActive(barberId, b.active, 'recepcao');
+      await svc.setBarberActive(barberId, b.active, 'recepcao');
     }
     res.json({ ok: true });
   });
 
   /* ------------------------------ histórico ------------------------------ */
 
-  r.get('/history', (req, res) => {
+  r.get('/history', async (req, res) => {
     const q = req.query;
     const limit = Math.min(200, Math.max(1, Number(q.limit) || 50));
     const offset = Math.max(0, Number(q.offset) || 0);
@@ -137,28 +136,30 @@ export function adminRouter(ctx: AppContext): Router {
       barberId: q.barberId ? id(q.barberId) : undefined,
     };
     const svc = ctx.current();
+    const historyRes = await svc.history({ ...filter, limit, offset });
+    const summaryRes = await svc.summary(filter);
     res.json({
       ok: true,
-      ...svc.history({ ...filter, limit, offset }),
-      summary: svc.summary(filter),
+      ...historyRes,
+      summary: summaryRes,
     });
   });
 
-  r.get('/audit', (req, res) => {
+  r.get('/audit', async (req, res) => {
     const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
     const offset = Math.max(0, Number(req.query.offset) || 0);
-    res.json({ ok: true, ...ctx.current().auditLog(limit, offset) });
+    res.json({ ok: true, ...(await ctx.current().auditLog(limit, offset)) });
   });
 
   /* ------------------------------- turno ------------------------------- */
 
-  r.post('/shift/open', (_req, res) => {
-    res.json(ctx.current().openShift('recepcao'));
+  r.post('/shift/open', async (_req, res) => {
+    res.json(await ctx.current().openShift('recepcao'));
   });
 
-  r.post('/shift/close', (_req, res) => {
+  r.post('/shift/close', async (_req, res) => {
     const svc = ctx.current();
-    const result = svc.closeShift('recepcao');
+    const result = await svc.closeShift('recepcao');
     if (svc.mode === 'real') ctx.backup('turno-encerrado');
     res.json(result);
   });

@@ -75,12 +75,13 @@ describe('Contexto de produção e cabeçalhos de segurança', () => {
         uploadsDir: path.join(dir, 'u'),
         backupsDir: path.join(dir, 'b'),
         clientDir: path.join(dir, 'c'),
+        supabaseSecretKey: '',
       }),
     );
     ctx.start();
     assert.equal(ctx.currentMode(), 'real');
     assert.equal(ctx.settings().shopName, 'Barba de Urso');
-    const names = ctx.current().barbers.list().map((b) => b.display_name);
+    const names = ctx.realService().barbers.list().map((b) => b.display_name);
     assert.equal(names.length, 13);
     assert.ok(names.includes('Severino'));
     assert.ok(names.includes('Diogo'));
@@ -99,6 +100,7 @@ describe('API HTTP + WebSocket (testes 6 e 8)', () => {
       port: 0,
       host: '0.0.0.0',
       initialAdminPin: '4321',
+      supabaseSecretKey: '',
     }),
   );
   ctx.start();

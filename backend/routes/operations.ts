@@ -36,10 +36,10 @@ function opId(body: Record<string, unknown>): string | undefined {
 export function operationsRouter(ctx: AppContext): Router {
   const r = Router();
 
-  r.get('/state', (_req, res) => {
+  r.get('/state', async (_req, res) => {
     const svc = ctx.current();
-    svc.maintain();
-    res.json({ ok: true, snapshot: svc.snapshot() });
+    await svc.maintain();
+    res.json({ ok: true, snapshot: await svc.snapshot() });
   });
 
   r.get('/network', (_req, res) => {
@@ -50,47 +50,46 @@ export function operationsRouter(ctx: AppContext): Router {
     });
   });
 
-  r.post('/ops/enter', (req, res) => {
+  r.post('/ops/enter', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().enter(toId(b.barberId), { actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().enter(toId(b.barberId), { actor: source(b), opId: opId(b) }));
   });
 
-  r.post('/ops/resume', (req, res) => {
+  r.post('/ops/resume', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().resume(toId(b.barberId), { actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().resume(toId(b.barberId), { actor: source(b), opId: opId(b) }));
   });
 
-  r.post('/ops/start', (req, res) => {
+  r.post('/ops/start', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().start(toId(b.barberId), { actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().start(toId(b.barberId), { actor: source(b), opId: opId(b) }));
   });
 
-  r.post('/ops/start-next', (req, res) => {
+  r.post('/ops/start-next', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().startNext({ actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().startNext({ actor: source(b), opId: opId(b) }));
   });
 
-  r.post('/ops/finish', (req, res) => {
+  r.post('/ops/finish', async (req, res) => {
     const b = req.body ?? {};
     const attendanceId = b.attendanceId === undefined || b.attendanceId === null ? undefined : toId(b.attendanceId, 'attendanceId');
-    res.json(ctx.current().finish(toId(b.barberId), { actor: source(b), opId: opId(b), attendanceId }));
+    res.json(await ctx.current().finish(toId(b.barberId), { actor: source(b), opId: opId(b), attendanceId }));
   });
 
-  r.post('/ops/pause', (req, res) => {
+  r.post('/ops/pause', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().pause(toId(b.barberId), { actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().pause(toId(b.barberId), { actor: source(b), opId: opId(b) }));
   });
 
-  r.post('/ops/clock-out', (req, res) => {
+  r.post('/ops/clock-out', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().clockOut(toId(b.barberId), { actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().clockOut(toId(b.barberId), { actor: source(b), opId: opId(b) }));
   });
 
-  r.post('/ops/undo', (req, res) => {
+  r.post('/ops/undo', async (req, res) => {
     const b = req.body ?? {};
-    res.json(ctx.current().undo(toId(b.auditId, 'auditId'), { actor: source(b), opId: opId(b) }));
+    res.json(await ctx.current().undo(toId(b.auditId, 'auditId'), { actor: source(b), opId: opId(b) }));
   });
 
   return r;
 }
-
