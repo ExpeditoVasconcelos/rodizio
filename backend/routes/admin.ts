@@ -185,20 +185,6 @@ export function adminRouter(ctx: AppContext): Router {
     }
   });
 
-  /* ------------------------------- demonstração ------------------------------- */
-
-  r.post('/mode', (req, res) => {
-    const mode = req.body?.mode === 'demo' ? 'demo' : req.body?.mode === 'real' ? 'real' : null;
-    if (!mode) throw new AppError('BAD_REQUEST');
-    ctx.setMode(mode);
-    res.json({ ok: true, snapshot: ctx.current().snapshot() });
-  });
-
-  r.post('/demo/reset', (_req, res) => {
-    ctx.resetDemo();
-    res.json({ ok: true, snapshot: ctx.current().snapshot() });
-  });
-
   return r;
 }
 

@@ -1,9 +1,9 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 export const ROOT = process.env.RODIZIO_ROOT ? path.resolve(process.env.RODIZIO_ROOT) : process.cwd();
 
-/** Lê um arquivo .env simples (CHAVE=valor) sem sobrescrever variáveis já definidas. */
 function loadDotEnv(file: string): void {
   if (!fs.existsSync(file)) return;
   for (const raw of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
@@ -40,7 +40,12 @@ export interface AppConfig {
 }
 
 export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
-  const dataDir = path.resolve(ROOT, process.env.DATA_DIR ?? 'data');
+  // Em ambiente Serverless (Vercel), o sistema de arquivos fora de /tmp é somente leitura.
+  const defaultDataDir = process.env.VERCEL
+    ? path.join(os.tmpdir(), 'barba-de-urso-data')
+    : path.resolve(ROOT, 'data');
+  const dataDir = process.env.DATA_DIR ? path.resolve(ROOT, process.env.DATA_DIR) : defaultDataDir;
+
   return {
     port: int('PORT', 3000),
     host: process.env.HOST ?? '0.0.0.0',
@@ -54,4 +59,3 @@ export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     ...overrides,
   };
 }
-

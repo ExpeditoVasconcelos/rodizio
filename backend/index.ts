@@ -37,7 +37,7 @@ async function main(): Promise<void> {
   );
   if (nets.length === 0) console.log('  Tablet         : (nenhuma rede detectada — conecte-se ao Wi-Fi)');
   for (const n of nets) console.log(`  Tablet (${n.name.slice(0, 12).padEnd(12)}): http://${n.ip}:${running.port}`);
-  console.log(`  Modo atual     : ${ctx.currentMode() === 'demo' ? 'DEMONSTRAÇÃO' : 'real'}`);
+  console.log(`  Estabelecimento: ${ctx.settings().shopName}`);
   if (ctx.auth.mustChangePin) console.log('  PIN da recepção: 1234 (padrão) — troque em Administração › Sistema');
   console.log(`${line}\n  Para encerrar com segurança: Ctrl+C\n`);
 

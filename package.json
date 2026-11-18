@@ -5,7 +5,7 @@
   "description": "Quadro digital de rodízio para barbearias — servidor local no notebook da recepção e painel touchscreen para o tablet dos barbeiros.",
   "type": "module",
   "engines": {
-    "node": ">=22.13.0"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "concurrently -k -n api,web -c yellow,cyan \"npm:dev:server\" \"npm:dev:client\"",

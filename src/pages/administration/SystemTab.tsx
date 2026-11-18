@@ -3,7 +3,6 @@ import {
   Copy,
   Database,
   Download,
-  RotateCcw,
   Save,
   Trash2,
 } from 'lucide-react';
@@ -109,24 +108,6 @@ export function SystemTab() {
     }
   };
 
-  const handleSwitchMode = async (mode: 'real' | 'demo') => {
-    try {
-      await adminApi.setMode(mode);
-      await load();
-    } catch (err) {
-      pushToast('error', err instanceof ApiError ? err.message : 'Falha ao alterar modo.');
-    }
-  };
-
-  const handleResetDemo = async () => {
-    try {
-      await adminApi.resetDemo();
-      pushToast('success', 'Demonstração reiniciada.');
-    } catch (err) {
-      pushToast('error', err instanceof ApiError ? err.message : 'Falha ao reiniciar demonstração.');
-    }
-  };
-
   const primaryLan = info?.addresses[0];
   const tabletUrl = primaryLan ? `${primaryLan.url}/painel` : `${location.origin}/painel`;
 
@@ -144,7 +125,7 @@ export function SystemTab() {
       <div className="border-b border-zinc-200 pb-5">
         <h1 className="text-xl font-bold tracking-tight text-zinc-900">Sistema, Rede e Backup</h1>
         <p className="mt-0.5 text-xs text-zinc-500">
-          Conecte o dispositivo móvel na rede Wi-Fi, configure o estabelecimento e gerencie backups locais.
+          Conecte o dispositivo móvel, configure o estabelecimento e gerencie segurança e backups.
         </p>
       </div>
 
@@ -152,10 +133,10 @@ export function SystemTab() {
         {/* Acesso pelo dispositivo móvel */}
         <section className="rounded-xl border border-zinc-200 bg-white p-5">
           <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">
-            Acesso pelo tablet / celular na rede local
+            Acesso pelo tablet / celular
           </h2>
           <p className="mt-1 text-xs text-zinc-500">
-            Conecte o dispositivo ao mesmo Wi-Fi deste computador (porta {info?.port ?? 3000}).
+            Escaneie o QR Code ou acesse o endereço abaixo no navegador do dispositivo móvel.
           </p>
 
           <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
@@ -195,7 +176,7 @@ export function SystemTab() {
             </label>
             {info?.settings.logoUrl && (
               <Button size="sm" variant="ghost" onClick={handleRemoveLogo} icon={<Trash2 size={13} />}>
-                Remover
+                Restaurar logo padrão
               </Button>
             )}
           </div>
@@ -241,41 +222,16 @@ export function SystemTab() {
           </form>
         </section>
 
-        {/* Modo de operação e PIN */}
-        <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-5">
-          <div>
-            <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">
-              Modo de operação
-            </h2>
-            <p className="mt-1 text-xs text-zinc-500">
-              alterne entre o banco oficial e o banco de demonstração.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant={info?.mode === 'real' ? 'primary' : 'secondary'}
-                onClick={() => void handleSwitchMode('real')}
-              >
-                Operação real
-              </Button>
-              <Button
-                size="sm"
-                variant={info?.mode === 'demo' ? 'primary' : 'secondary'}
-                onClick={() => void handleSwitchMode('demo')}
-              >
-                Demonstração
-              </Button>
-              <Button size="sm" variant="ghost" onClick={handleResetDemo} icon={<RotateCcw size={13} />}>
-                Reiniciar demo
-              </Button>
-            </div>
-          </div>
-
-          <hr className="border-zinc-200" />
-
+        {/* Segurança: PIN da recepção */}
+        <section className="rounded-xl border border-zinc-200 bg-white p-5">
           <form onSubmit={handleChangePin} className="space-y-3">
-            <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">Alterar PIN da recepção</h2>
-            <div className="grid grid-cols-2 gap-2.5">
+            <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">
+              Segurança · Alterar PIN da recepção
+            </h2>
+            <p className="text-xs text-zinc-500">
+              O PIN protege o acesso administrativo ao cadastro, turnos, histórico e configurações.
+            </p>
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-zinc-600">PIN atual</label>
                 <input
@@ -289,7 +245,7 @@ export function SystemTab() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-zinc-600">Novo PIN</label>
+                <label className="mb-1 block text-xs font-semibold text-zinc-600">Novo PIN (4 a 12 dígitos)</label>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -323,7 +279,7 @@ export function SystemTab() {
             </Button>
           </div>
           <p className="mt-1 text-xs text-zinc-500">
-            Cópias locais salvas automaticamente em <code className="text-zinc-700">data/backups</code>.
+            Cópias consistentes do banco de dados para download e restauração.
           </p>
 
           <div className="mt-3 max-h-56 divide-y divide-zinc-100 overflow-y-auto rounded-lg border border-zinc-200">

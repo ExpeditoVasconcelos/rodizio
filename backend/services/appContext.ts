@@ -1,28 +1,26 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
-import type { Mode } from '../../shared/types.js';
 import type { AppConfig } from '../config.js';
 import { closeDatabase, openDatabase, type Db } from '../database/connection.js';
 import { migrateSystem } from '../database/schema.js';
+import { AppError } from '../domain/errors.js';
 import { SystemRepository } from '../repositories/systemRepository.js';
 import { AuthService } from './authService.js';
-import { seedDemo } from './demoSeed.js';
+import { seedProductionIfEmpty } from './productionSeed.js';
 import { RodizioService, type RodizioSettings } from './rodizioService.js';
-import { AppError } from '../domain/errors.js';
 
 export type ChangeListener = () => void;
 
 /**
- * Mantém os dois bancos operacionais separados (real e demonstração) e o banco de sistema
- * (usuários e configurações). Apenas um modo fica "ativo" por vez, para todos os dispositivos.
+ * Contexto principal de produção: mantém o banco operacional oficial (rodizio.db)
+ * e o banco de sistema (usuários e configurações).
  */
 export class AppContext {
   readonly system: SystemRepository;
   readonly auth: AuthService;
   private systemDb: Db;
   private real: RodizioService;
-  private demo: RodizioService | null = null;
   private listeners = new Set<ChangeListener>();
   private maintenanceTimer?: NodeJS.Timeout;
   private backupTimer?: NodeJS.Timeout;
@@ -38,18 +36,17 @@ export class AppContext {
     if (!this.system.getSetting('shop_name') || this.system.getSetting('shop_name') === 'Barbearia') {
       this.system.setSetting('shop_name', 'Barba de Urso');
     }
+    this.system.setSetting('mode', 'real');
     this.auth = new AuthService(this.system, config.initialAdminPin);
-    this.real = this.createService('real', this.file('rodizio.db'));
-    if (this.currentMode() === 'demo') this.ensureDemo();
+    this.real = this.createService(this.file('rodizio.db'));
+    seedProductionIfEmpty(this.real);
   }
 
-  /* --------------------------- inicialização --------------------------- */
-
   start(): { integrity: string; fixes: string[] } {
-    const report = this.current().recover();
+    const report = this.real.recover();
     this.maintenanceTimer = setInterval(() => {
       try {
-        this.current().maintain();
+        this.real.maintain();
       } catch (err) {
         console.error('[manutenção] falhou:', err);
       }
@@ -65,63 +62,26 @@ export class AppContext {
     return path.join(this.config.dataDir, name);
   }
 
-  private createService(mode: Mode, dbFile: string): RodizioService {
+  private createService(dbFile: string): RodizioService {
     const db = openDatabase(dbFile);
-    const service = new RodizioService(db, {
-      mode,
+    return new RodizioService(db, {
+      mode: 'real',
       settings: () => this.settings(),
-      onChange: () => {
-        if (this.current().mode === mode) this.emit();
-      },
+      onChange: () => this.emit(),
     });
-    return service;
   }
 
-  /* ------------------------------- modo ------------------------------- */
-
-  currentMode(): Mode {
-    return this.system.getSetting('mode') === 'demo' ? 'demo' : 'real';
+  currentMode(): 'real' {
+    return 'real';
   }
 
   current(): RodizioService {
-    return this.currentMode() === 'demo' ? this.ensureDemo() : this.real;
+    return this.real;
   }
 
   realService(): RodizioService {
     return this.real;
   }
-
-  private ensureDemo(): RodizioService {
-    if (!this.demo) {
-      const file = this.file('demo.db');
-      const fresh = !fs.existsSync(file);
-      this.demo = this.createService('demo', file);
-      if (fresh) seedDemo(this.demo);
-    }
-    return this.demo;
-  }
-
-  setMode(mode: Mode): void {
-    if (mode === 'demo') this.ensureDemo();
-    this.system.setSetting('mode', mode);
-    this.current().maintain();
-    this.emit();
-  }
-
-  /** REINICIAR DEMONSTRAÇÃO: descarta apenas o banco de demonstração e recria o estado inicial. */
-  resetDemo(): void {
-    if (this.demo) {
-      closeDatabase(this.demo.db);
-      this.demo = null;
-    }
-    for (const suffix of ['', '-wal', '-shm']) {
-      fs.rmSync(this.file('demo.db') + suffix, { force: true });
-    }
-    this.ensureDemo();
-    this.emit();
-  }
-
-  /* --------------------------- configurações --------------------------- */
 
   settings(): RodizioSettings {
     const win = Number.parseInt(this.system.getSetting('undo_window_seconds') ?? '', 10);
@@ -145,10 +105,9 @@ export class AppContext {
       }
       this.system.setSetting('undo_window_seconds', String(n));
     }
-    this.current().touch(actor);
+    this.real.touch(actor);
   }
 
-  /** Salva imagem (data URL) enviada pelo navegador e devolve a URL pública. */
   saveImage(dataUrl: string, prefix: string): string {
     const m = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl ?? '');
     if (!m) throw new AppError('BAD_REQUEST', 'IMAGEM INVÁLIDA. USE PNG, JPEG OU WEBP.');
@@ -163,12 +122,9 @@ export class AppContext {
   setLogo(url: string | null, actor: string): void {
     if (url) this.system.setSetting('logo_url', url);
     else this.system.deleteSetting('logo_url');
-    this.current().touch(actor);
+    this.real.touch(actor);
   }
 
-  /* ------------------------------- backup ------------------------------- */
-
-  /** Cria uma cópia consistente do banco REAL em data/backups. */
   backup(label: string): string {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
     const name = `rodizio-${stamp}-${label}.db`;
@@ -210,8 +166,6 @@ export class AppContext {
     }
   }
 
-  /* ------------------------------ eventos ------------------------------ */
-
   onChange(fn: ChangeListener): () => void {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
@@ -227,8 +181,6 @@ export class AppContext {
     }
   }
 
-  /* ----------------------------- encerramento ----------------------------- */
-
   close(): void {
     if (this.closed) return;
     this.closed = true;
@@ -236,8 +188,6 @@ export class AppContext {
     if (this.backupTimer) clearInterval(this.backupTimer);
     this.safeBackup('encerramento');
     closeDatabase(this.real.db);
-    if (this.demo) closeDatabase(this.demo.db);
     closeDatabase(this.systemDb);
   }
 }
-

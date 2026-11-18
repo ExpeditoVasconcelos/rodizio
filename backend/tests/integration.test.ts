@@ -66,38 +66,20 @@ describe('TESTE 7 — interrupção e recuperação', () => {
   });
 });
 
-describe('Modo demonstração (separado dos dados reais)', () => {
-  it('popula, mantém separado e reinicia o estado inicial', () => {
+describe('Contexto de produção e cabeçalhos de segurança', () => {
+  it('inicializa com nome Barba de Urso em modo oficial de produção', () => {
     const dir = tmp();
-    const ctx = new AppContext(loadConfig({ dataDir: dir, uploadsDir: path.join(dir, 'u'), backupsDir: path.join(dir, 'b'), clientDir: path.join(dir, 'c') }));
+    const ctx = new AppContext(
+      loadConfig({
+        dataDir: dir,
+        uploadsDir: path.join(dir, 'u'),
+        backupsDir: path.join(dir, 'b'),
+        clientDir: path.join(dir, 'c'),
+      }),
+    );
     ctx.start();
-    const real = ctx.realService();
-    seedBarbers(real, 2);
-    ctx.setMode('demo');
-    const demo = ctx.current();
-    assert.equal(demo.mode, 'demo');
-    assert.deepEqual(queueNames(demo), ['João', 'Carlos', 'Pedro', 'Marcos']);
-    const snap = demo.snapshot();
-    assert.deepEqual(
-      snap.barbers.filter((b) => b.state === 'PAUSA').map((b) => b.displayName),
-      ['Rafael'],
-    );
-    assert.deepEqual(
-      snap.barbers.filter((b) => b.state === 'FORA').map((b) => b.displayName),
-      ['Lucas'],
-    );
-    assert.equal(snap.undo, null);
-    // Alterações na demonstração não afetam os dados reais.
-    const joao = snap.barbers.find((b) => b.displayName === 'João')!;
-    demo.start(joao.id, { actor: 'tablet' });
-    assert.equal(real.snapshot().barbers.length, 2);
-    assert.equal(real.history({ limit: 10, offset: 0 }).total, 0);
-    const streamBefore = demo.snapshot().stream;
-    ctx.resetDemo();
-    assert.deepEqual(queueNames(ctx.current()), ['João', 'Carlos', 'Pedro', 'Marcos']);
-    assert.notEqual(ctx.current().snapshot().stream, streamBefore);
-    ctx.setMode('real');
-    assert.equal(ctx.current().mode, 'real');
+    assert.equal(ctx.currentMode(), 'real');
+    assert.equal(ctx.settings().shopName, 'Barba de Urso');
     ctx.close();
   });
 });
@@ -218,14 +200,9 @@ describe('API HTTP + WebSocket (testes 6 e 8)', () => {
     assert.ok(bk.json.backups.length >= 1);
     const dl = await fetch(`${base}/api/admin/backups/${bk.json.name}`, { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(dl.status, 200);
+    assert.equal(dl.headers.get('x-frame-options'), 'DENY');
+    assert.ok(dl.headers.get('content-security-policy')?.includes("default-src 'self'"));
     assert.equal(Buffer.from(await dl.arrayBuffer()).subarray(0, 15).toString(), 'SQLite format 3');
-
-    // Modo demonstração via API admin
-    const mode = await call('POST', '/api/admin/mode', { mode: 'demo' }, token);
-    assert.equal(mode.status, 200);
-    await new Promise((r) => setTimeout(r, 150));
-    assert.equal(snapshots.at(-1)!.mode, 'demo');
-    await call('POST', '/api/admin/mode', { mode: 'real' }, token);
 
     ws.close();
   });

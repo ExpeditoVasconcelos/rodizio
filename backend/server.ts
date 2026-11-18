@@ -4,6 +4,7 @@ import path from 'node:path';
 import express, { type Express } from 'express';
 import { AppError } from './domain/errors.js';
 import { errorHandler } from './middleware/errors.js';
+import { rateLimiter, securityHeaders } from './middleware/security.js';
 import { adminRouter } from './routes/admin.js';
 import { operationsRouter } from './routes/operations.js';
 import type { AppContext } from './services/appContext.js';
@@ -20,14 +21,12 @@ export interface RunningServer {
 export function createApp(ctx: AppContext): Express {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', false);
+  app.set('trust proxy', Boolean(process.env.VERCEL));
 
-  app.use((_req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Referrer-Policy', 'same-origin');
-    next();
-  });
-  app.use(express.json({ limit: '3mb' }));
+  app.use(securityHeaders());
+  app.use('/api/ops', rateLimiter({ windowMs: 60_000, max: 180 }));
+  app.use('/api/admin', rateLimiter({ windowMs: 60_000, max: 120 }));
+  app.use(express.json({ limit: '2mb' }));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true, mode: ctx.currentMode(), time: Date.now() });

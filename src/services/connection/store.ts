@@ -5,9 +5,7 @@ export type ConnectionStatus = 'connecting' | 'online' | 'offline';
 export interface RodizioState {
   snapshot: StateSnapshot | null;
   status: ConnectionStatus;
-  /** Já houve alguma conexão bem-sucedida? (diferencia "conectando" de "conexão perdida") */
   everConnected: boolean;
-  /** Diferença (servidor − relógio local) em ms, para cronômetros corretos mesmo com relógios diferentes. */
   offsetMs: number;
 }
 
@@ -27,17 +25,17 @@ export const rodizioStore = {
     listeners.add(l);
     return () => listeners.delete(l);
   },
-  /** Hora do servidor (aproximada) agora. */
   serverNow: (): number => Date.now() + state.offsetMs,
 
-  /**
-   * Aplica um estado recebido do servidor, ignorando estados mais antigos que o atual.
-   * (Comparação só vale dentro da mesma "linha do tempo" — modo/época do banco.)
-   */
   applySnapshot(next: StateSnapshot): void {
     const cur = state.snapshot;
     if (cur && cur.stream === next.stream && next.version < cur.version) return;
-    set({ snapshot: next, offsetMs: next.serverTime - Date.now() });
+    set({
+      snapshot: next,
+      offsetMs: next.serverTime - Date.now(),
+      status: 'online',
+      everConnected: true,
+    });
   },
 
   setStatus(status: ConnectionStatus): void {
@@ -46,7 +44,7 @@ export const rodizioStore = {
   },
 };
 
-/* --------------------------- conexão em tempo real --------------------------- */
+/* ---------------- Conexão híbrida: WebSocket + HTTP Polling (Vercel) ---------------- */
 
 const WATCHDOG_MS = 13_000;
 let ws: WebSocket | null = null;
@@ -54,6 +52,7 @@ let retry = 0;
 let reconnectTimer: number | undefined;
 let lastMessageAt = 0;
 let started = false;
+let wsSupported = true;
 
 function wsUrl(): string {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -61,20 +60,20 @@ function wsUrl(): string {
 }
 
 function scheduleReconnect(): void {
+  if (!wsSupported) return;
   window.clearTimeout(reconnectTimer);
-  const delay = Math.min(5000, 400 * Math.pow(1.6, retry++));
+  const delay = Math.min(8000, 500 * Math.pow(1.6, retry++));
   reconnectTimer = window.setTimeout(connect, delay);
 }
 
 function connect(): void {
+  if (!wsSupported) return;
   window.clearTimeout(reconnectTimer);
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
-  if (!rodizioStore.get().everConnected) rodizioStore.setStatus('connecting');
   let socket: WebSocket;
   try {
     socket = new WebSocket(wsUrl());
   } catch {
-    rodizioStore.setStatus('offline');
     scheduleReconnect();
     return;
   }
@@ -83,7 +82,6 @@ function connect(): void {
     retry = 0;
     lastMessageAt = Date.now();
     rodizioStore.setStatus('online');
-    // O servidor envia o estado completo ao conectar => sincronização após reconexão.
   };
   socket.onmessage = (ev) => {
     lastMessageAt = Date.now();
@@ -91,10 +89,8 @@ function connect(): void {
       const msg = JSON.parse(String(ev.data)) as { type: string; snapshot?: StateSnapshot; serverTime?: number };
       if (msg.type === 'snapshot' && msg.snapshot) rodizioStore.applySnapshot(msg.snapshot);
       else if (msg.type === 'tick' && msg.serverTime) {
-        // Mantém o relógio alinhado ao do servidor.
         const cur = rodizioStore.get();
         const offset = msg.serverTime - Date.now();
-        // Atualização silenciosa (sem re-render): os cronômetros leem o deslocamento a cada segundo.
         if (Math.abs(offset - cur.offsetMs) > 400) state = { ...state, offsetMs: offset };
       }
     } catch {
@@ -103,7 +99,11 @@ function connect(): void {
   };
   socket.onclose = () => {
     if (ws === socket) ws = null;
-    rodizioStore.setStatus('offline');
+    if (retry >= 4 && rodizioStore.get().status === 'online') {
+      // Ambiente Serverless (ex.: Vercel) sem WebSocket persistente: opera via HTTP Polling.
+      wsSupported = false;
+      return;
+    }
     scheduleReconnect();
   };
   socket.onerror = () => {
@@ -115,45 +115,56 @@ function connect(): void {
   };
 }
 
-/** Busca o estado por HTTP (carga inicial / ressincronização manual). */
-export async function refreshState(): Promise<void> {
+/** Busca o estado via HTTP (carga inicial e sincronização contínua em ambientes Serverless). */
+export async function refreshState(): Promise<boolean> {
   try {
     const res = await fetch('/api/state', { cache: 'no-store' });
+    if (!res.ok) throw new Error('bad_status');
     const json = (await res.json()) as { ok: boolean; snapshot?: StateSnapshot };
-    if (json.ok && json.snapshot) rodizioStore.applySnapshot(json.snapshot);
+    if (json.ok && json.snapshot) {
+      rodizioStore.applySnapshot(json.snapshot);
+      return true;
+    }
+    return false;
   } catch {
-    /* a conexão em tempo real cuidará do status */
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      rodizioStore.setStatus('offline');
+    }
+    return false;
   }
 }
 
-/** Inicia (uma única vez) a conexão em tempo real, reconexão automática e vigilância. */
 export function startConnection(): void {
   if (started) return;
   started = true;
   void refreshState();
   connect();
 
+  // Polling leve automático quando o WebSocket não estiver aberto (ex.: Vercel Serverless).
   window.setInterval(() => {
-    if (ws && ws.readyState === WebSocket.OPEN && Date.now() - lastMessageAt > WATCHDOG_MS) {
-      // Silêncio prolongado: provavelmente a rede caiu sem avisar.
-      rodizioStore.setStatus('offline');
+    const wsOpen = ws && ws.readyState === WebSocket.OPEN;
+    if (wsOpen && Date.now() - lastMessageAt > WATCHDOG_MS) {
       try {
-        ws.close();
+        ws?.close();
       } catch {
         /* ignore */
       }
     }
-  }, 3000);
+    if (!wsOpen) {
+      void refreshState();
+    }
+  }, 2500);
 
   window.addEventListener('offline', () => rodizioStore.setStatus('offline'));
   window.addEventListener('online', () => {
     retry = 0;
+    void refreshState();
     connect();
   });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      connect();
       void refreshState();
+      connect();
     }
   });
 }

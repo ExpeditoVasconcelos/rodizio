@@ -60,9 +60,7 @@ export default function AdminPage() {
               <div className="truncate text-sm font-bold tracking-tight text-zinc-900">
                 {snapshot?.shop.name ?? 'Barba de Urso'}
               </div>
-              <div className="text-[0.68rem] font-medium text-zinc-400">
-                Recepção {snapshot?.mode === 'demo' ? '· Demo' : ''}
-              </div>
+              <div className="text-[0.68rem] font-medium text-zinc-400">Recepção</div>
             </div>
           </div>
 

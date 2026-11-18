@@ -6,11 +6,9 @@ import type {
   AuditRow,
   BackupInfo,
   BarberSummaryRow,
-  StateSnapshot,
   SystemInfo,
 } from '../../../shared/types';
 import { ApiError, request } from '../http';
-import { rodizioStore } from '../connection/store';
 
 /* ------------------------------- sessão ------------------------------- */
 
@@ -108,15 +106,6 @@ export const adminApi = {
     a.download = name;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-  },
-
-  async setMode(mode: 'demo' | 'real'): Promise<void> {
-    const res = await call<{ snapshot: StateSnapshot }>('POST', '/api/admin/mode', { mode });
-    rodizioStore.applySnapshot(res.snapshot);
-  },
-  async resetDemo(): Promise<void> {
-    const res = await call<{ snapshot: StateSnapshot }>('POST', '/api/admin/demo/reset', {});
-    rodizioStore.applySnapshot(res.snapshot);
   },
 };
 

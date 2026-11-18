@@ -91,23 +91,6 @@ export function operationsRouter(ctx: AppContext): Router {
     res.json(ctx.current().undo(toId(b.auditId, 'auditId'), { actor: source(b), opId: opId(b) }));
   });
 
-  // Controle do ambiente de demonstração (opera apenas sobre demo.db, separado dos dados reais).
-  r.post('/demo/activate', (_req, res) => {
-    ctx.setMode('demo');
-    res.json({ ok: true, snapshot: ctx.current().snapshot() });
-  });
-
-  r.post('/demo/reset', (_req, res) => {
-    ctx.setMode('demo');
-    ctx.resetDemo();
-    res.json({ ok: true, snapshot: ctx.current().snapshot() });
-  });
-
-  r.post('/demo/exit', (_req, res) => {
-    ctx.setMode('real');
-    res.json({ ok: true, snapshot: ctx.current().snapshot() });
-  });
-
   return r;
 }
 

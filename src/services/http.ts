@@ -22,7 +22,16 @@ export function makeOpId(): string {
 
 export function currentSource(): 'tablet' | 'recepcao' {
   const p = location.pathname;
-  return p.startsWith('/admin') || p.startsWith('/demo') ? 'recepcao' : 'tablet';
+  return p.startsWith('/admin') ? 'recepcao' : 'tablet';
+}
+
+export interface NetworkInfo {
+  port: number;
+  addresses: { name: string; address: string; url: string }[];
+}
+
+export async function fetchNetworkInfo(): Promise<NetworkInfo> {
+  return request<NetworkInfo>('GET', '/api/network');
 }
 
 interface RequestOptions {
