@@ -174,7 +174,7 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                       <div className="flex items-center gap-2">
                         <span
                           className="truncate text-sm font-bold"
-                          style={{ color: b.color ?? '#09090b' }}
+                          style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                         >
                           {b.displayName}
                         </span>
@@ -249,7 +249,7 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                       <div className="flex items-center gap-2">
                         <span
                           className="truncate text-sm font-bold"
-                          style={{ color: b.color ?? '#09090b' }}
+                          style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                         >
                           {b.displayName}
                         </span>
@@ -300,7 +300,7 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                   <div>
                     <span
                       className="text-sm font-bold"
-                      style={{ color: b.color ?? '#09090b' }}
+                      style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                     >
                       {b.displayName}
                     </span>
@@ -370,7 +370,7 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                 <div className="min-w-0 flex-1">
                   <div
                     className="truncate text-sm font-bold"
-                    style={{ color: b.color ?? '#09090b' }}
+                    style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                   >
                     {b.displayName}
                   </div>

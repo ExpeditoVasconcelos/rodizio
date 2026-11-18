@@ -1,14 +1,14 @@
 {
-  "name": "Rodízio Digital — Barbearia",
-  "short_name": "Rodízio",
+  "name": "Barba de Urso — Rodízio Digital",
+  "short_name": "Barba de Urso",
   "description": "Quadro de rodízio para os barbeiros.",
   "start_url": "/painel",
   "scope": "/",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
   "orientation": "any",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }

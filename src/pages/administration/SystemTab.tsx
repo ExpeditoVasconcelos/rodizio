@@ -159,7 +159,7 @@ export function SystemTab() {
           </p>
 
           <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
-            <div className="shrink-0 rounded-xl border border-zinc-200 bg-white p-3">
+            <div className="qr-surface shrink-0 rounded-xl border border-zinc-200 p-3">
               <QRCodeSVG value={tabletUrl} size={124} level="M" />
             </div>
 

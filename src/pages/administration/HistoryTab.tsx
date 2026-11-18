@@ -219,7 +219,7 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
                       <tr key={s.barberId}>
                         <td
                           className="px-4 py-2.5 text-sm font-bold"
-                          style={{ color: colorMap.get(s.barberId) ?? '#09090b' }}
+                          style={{ color: colorMap.get(s.barberId) ?? 'var(--color-zinc-900)' }}
                         >
                           {s.barberName}
                         </td>
@@ -268,7 +268,7 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
                         <td className="tabular px-4 py-2.5 text-zinc-400">#{r.id}</td>
                         <td
                           className="px-4 py-2.5 text-sm font-bold"
-                          style={{ color: colorMap.get(r.barberId) ?? '#09090b' }}
+                          style={{ color: colorMap.get(r.barberId) ?? 'var(--color-zinc-900)' }}
                         >
                           {r.barberName}
                         </td>
@@ -318,7 +318,7 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
                     </td>
                     <td
                       className="px-4 py-2 font-bold"
-                      style={{ color: (a.barberId ? colorMap.get(a.barberId) : null) ?? '#09090b' }}
+                      style={{ color: (a.barberId ? colorMap.get(a.barberId) : null) ?? 'var(--color-zinc-900)' }}
                     >
                       {a.barberName ?? '—'}
                     </td>

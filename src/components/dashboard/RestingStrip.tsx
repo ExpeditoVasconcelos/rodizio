@@ -51,7 +51,7 @@ export function AvailableSheet({ open, onClose, barbers, pending, disabled, onRu
               <div className="min-w-0 flex-1">
                 <div
                   className="truncate text-base font-bold"
-                  style={{ color: b.color ?? '#09090b' }}
+                  style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                 >
                   {b.displayName}
                 </div>

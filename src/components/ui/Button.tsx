@@ -7,12 +7,12 @@ export function cn(...parts: (string | false | null | undefined)[]): string {
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'queue' | 'work';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-zinc-900 text-white hover:bg-zinc-800 active:bg-black',
+  primary: 'bg-zinc-900 text-white hover:bg-zinc-800 active:opacity-90',
   secondary: 'bg-white text-zinc-900 border border-zinc-300 hover:bg-zinc-50 active:bg-zinc-100',
   ghost: 'bg-transparent text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 active:bg-zinc-200',
   danger: 'bg-white text-zinc-900 border border-zinc-300 hover:bg-zinc-100 active:bg-zinc-200',
-  queue: 'bg-zinc-900 text-white hover:bg-zinc-800 active:bg-black',
-  work: 'bg-zinc-900 text-white hover:bg-zinc-800 active:bg-black',
+  queue: 'bg-zinc-900 text-white hover:bg-zinc-800 active:opacity-90',
+  work: 'bg-zinc-900 text-white hover:bg-zinc-800 active:opacity-90',
 };
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {

@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { ConnectionBadge } from '../components/ui/ConnectionBadge';
 import { Logo } from '../components/ui/Logo';
 import { Sheet } from '../components/ui/Sheet';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Toasts } from '../components/ui/Toasts';
 import { formatClock } from '../domain/format';
 import { useFullscreen } from '../hooks/useFullscreen';
@@ -46,10 +47,10 @@ export default function LandingPage() {
       <header className="border-b border-zinc-200 px-6 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Logo url={snapshot?.shop.logoUrl} size={32} />
+            <Logo url={snapshot?.shop.logoUrl} size={36} />
             <div>
               <div className="text-sm font-bold tracking-tight text-zinc-900">
-                {snapshot?.shop.name ?? 'Barbearia'}
+                {snapshot?.shop.name ?? 'Barba de Urso'}
               </div>
               <div className="text-[0.68rem] font-medium text-zinc-400">
                 Sistema de Rodízio {snapshot?.mode === 'demo' ? '· Demonstração' : ''}
@@ -57,9 +58,10 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <ConnectionBadge status={status} />
             <span className="tabular text-xs font-semibold text-zinc-500">{formatClock(now)}</span>
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -95,7 +97,7 @@ export default function LandingPage() {
                     <div className="text-[0.65rem] font-semibold text-zinc-400 uppercase">Próximo</div>
                     <div
                       className="mt-0.5 truncate text-base font-bold"
-                      style={{ color: nextBarber?.color ?? '#09090b' }}
+                      style={{ color: nextBarber?.color ?? 'var(--color-zinc-900)' }}
                     >
                       {nextBarber?.displayName ?? '—'}
                     </div>
@@ -205,7 +207,7 @@ export default function LandingPage() {
         title={<div className="text-base font-bold text-zinc-900">Acesso pelo celular / tablet</div>}
       >
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="rounded-xl border border-zinc-200 bg-white p-3">
+          <div className="qr-surface rounded-xl border border-zinc-200 p-3">
             <QRCodeSVG value={tabletUrl} size={170} level="M" />
           </div>
           <div className="w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3">

@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConnectionBadge } from '../../components/ui/ConnectionBadge';
 import { Logo } from '../../components/ui/Logo';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { Toasts } from '../../components/ui/Toasts';
 import { useRodizio } from '../../hooks/useRodizio';
 import { adminSession, useAdminToken } from '../../services/admin/adminService';
@@ -54,10 +55,10 @@ export default function AdminPage() {
       >
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2 pt-1">
-            <Logo url={snapshot?.shop.logoUrl} size={32} />
+            <Logo url={snapshot?.shop.logoUrl} size={34} />
             <div className="min-w-0">
               <div className="truncate text-sm font-bold tracking-tight text-zinc-900">
-                {snapshot?.shop.name ?? 'Barbearia'}
+                {snapshot?.shop.name ?? 'Barba de Urso'}
               </div>
               <div className="text-[0.68rem] font-medium text-zinc-400">
                 Recepção {snapshot?.mode === 'demo' ? '· Demo' : ''}
@@ -91,10 +92,11 @@ export default function AdminPage() {
           </nav>
         </div>
 
-        <div className="space-y-2 border-t border-zinc-200 pt-3">
+        <div className="space-y-1.5 border-t border-zinc-200 pt-3">
           <div className="px-2 py-1">
             <ConnectionBadge status={status} />
           </div>
+          <ThemeToggle showLabel className="w-full justify-start" />
           <button
             type="button"
             onClick={() => navigate('/painel')}

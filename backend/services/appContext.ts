@@ -35,6 +35,9 @@ export class AppContext {
     this.systemDb = openDatabase(this.file('sistema.db'));
     migrateSystem(this.systemDb);
     this.system = new SystemRepository(this.systemDb);
+    if (!this.system.getSetting('shop_name') || this.system.getSetting('shop_name') === 'Barbearia') {
+      this.system.setSetting('shop_name', 'Barba de Urso');
+    }
     this.auth = new AuthService(this.system, config.initialAdminPin);
     this.real = this.createService('real', this.file('rodizio.db'));
     if (this.currentMode() === 'demo') this.ensureDemo();
@@ -123,7 +126,7 @@ export class AppContext {
   settings(): RodizioSettings {
     const win = Number.parseInt(this.system.getSetting('undo_window_seconds') ?? '', 10);
     return {
-      shopName: this.system.getSetting('shop_name') ?? 'Barbearia',
+      shopName: this.system.getSetting('shop_name') ?? 'Barba de Urso',
       logoUrl: this.system.getSetting('logo_url') ?? null,
       undoWindowSeconds: Number.isFinite(win) && win >= 5 ? win : 90,
     };

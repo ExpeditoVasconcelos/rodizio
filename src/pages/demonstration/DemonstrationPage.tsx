@@ -15,7 +15,9 @@ import type { BarberView } from '../../../shared/types';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { ConnectionBadge } from '../../components/ui/ConnectionBadge';
+import { Logo } from '../../components/ui/Logo';
 import { Sheet } from '../../components/ui/Sheet';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { Toasts } from '../../components/ui/Toasts';
 import { formatDuration, KIND_LABEL, STATE_LABEL } from '../../domain/format';
 import { pushToast } from '../../hooks/toasts';
@@ -139,8 +141,9 @@ export default function DemonstrationPage() {
               Início
             </Button>
             <div className="h-4 w-px bg-zinc-200" />
+            <Logo url={snapshot?.shop.logoUrl} size={30} />
             <div>
-              <h1 className="text-base font-bold text-zinc-900">Modo Demonstração</h1>
+              <h1 className="text-base font-bold text-zinc-900">Barba de Urso · Modo Demonstração</h1>
               <p className="text-xs text-zinc-500">
                 Banco isolado (<code className="text-zinc-700">demo.db</code>) · Dados reais preservados
               </p>
@@ -149,6 +152,7 @@ export default function DemonstrationPage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <ConnectionBadge status={status} />
+            <ThemeToggle />
             <Button size="sm" variant="secondary" onClick={() => setQrOpen(true)} icon={<QrCode size={14} />}>
               Conectar celular/tablet
             </Button>
@@ -326,7 +330,7 @@ export default function DemonstrationPage() {
                     >
                       <span
                         className="text-xs font-bold"
-                        style={{ color: b.color ?? '#09090b' }}
+                        style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                       >
                         {b.displayName}
                       </span>
@@ -360,7 +364,7 @@ export default function DemonstrationPage() {
         title={<div className="text-base font-bold text-zinc-900">Demonstração em 2 dispositivos</div>}
       >
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="rounded-xl border border-zinc-200 bg-white p-3">
+          <div className="qr-surface rounded-xl border border-zinc-200 p-3">
             <QRCodeSVG value={tabletUrl} size={170} level="M" />
           </div>
           <div className="w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3">
@@ -400,7 +404,7 @@ function DemoQueueRow({
       <div className="min-w-0 flex-1">
         <div
           className="truncate text-sm font-bold"
-          style={{ color: barber.color ?? '#09090b' }}
+          style={{ color: barber.color ?? 'var(--color-zinc-900)' }}
         >
           {barber.displayName}
         </div>
@@ -432,7 +436,7 @@ function DemoWorkingRow({
       <div className="min-w-0 flex-1">
         <div
           className="truncate text-sm font-bold"
-          style={{ color: barber.color ?? '#09090b' }}
+          style={{ color: barber.color ?? 'var(--color-zinc-900)' }}
         >
           {barber.displayName}
         </div>

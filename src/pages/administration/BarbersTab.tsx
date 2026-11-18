@@ -176,7 +176,7 @@ export function BarbersTab({ onInspectHistory }: { onInspectHistory: (barberId: 
                       )}
                       <span
                         className="text-base font-bold"
-                        style={{ color: b.color ?? '#09090b' }}
+                        style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                       >
                         {b.displayName}
                       </span>

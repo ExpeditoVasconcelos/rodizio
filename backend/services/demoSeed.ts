@@ -1,12 +1,12 @@
 import type { RodizioService } from './rodizioService.js';
 
 export const DEMO_BARBERS: { name: string; color: string }[] = [
-  { name: 'João', color: '#1d4ed8' },
-  { name: 'Carlos', color: '#0f766e' },
-  { name: 'Pedro', color: '#b45309' },
-  { name: 'Marcos', color: '#be123c' },
-  { name: 'Rafael', color: '#6d28d9' },
-  { name: 'Lucas', color: '#15803d' },
+  { name: 'João', color: '#3b82f6' },
+  { name: 'Carlos', color: '#10b981' },
+  { name: 'Pedro', color: '#f59e0b' },
+  { name: 'Marcos', color: '#f43f5e' },
+  { name: 'Rafael', color: '#8b5cf6' },
+  { name: 'Lucas', color: '#22c55e' },
 ];
 
 /**

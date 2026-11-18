@@ -42,7 +42,7 @@ export function BarberCardFace({
   const wait = barber.queueEnteredAt ? (now - barber.queueEnteredAt) / 1000 : 0;
   const att = barber.attendance;
   const elapsed = att ? (now - att.startedAt) / 1000 : 0;
-  const nameColor = barber.color ?? '#09090b';
+  const nameColor = barber.color ?? 'var(--color-zinc-900)';
 
   return (
     <div
@@ -139,7 +139,7 @@ function RestFace({
     >
       <span
         className="truncate text-sm font-semibold"
-        style={{ color: barber.color ?? '#09090b' }}
+        style={{ color: barber.color ?? 'var(--color-zinc-900)' }}
       >
         {barber.displayName}
       </span>

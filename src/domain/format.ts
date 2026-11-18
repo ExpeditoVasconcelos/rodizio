@@ -80,16 +80,16 @@ export function initials(name: string): string {
   return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 }
 
-/** Cores sóbrias e de bom contraste sobre fundo branco para identificar o nome de cada barbeiro. */
+/** Cores com ótimo contraste tanto no modo escuro padrão quanto no modo branco secundário. */
 export const BARBER_COLORS = [
-  '#1d4ed8',
-  '#0f766e',
-  '#b45309',
-  '#be123c',
-  '#6d28d9',
-  '#15803d',
-  '#0369a1',
-  '#9a3412',
-  '#4338ca',
-  '#374151',
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#f43f5e',
+  '#8b5cf6',
+  '#22c55e',
+  '#06b6d4',
+  '#f97316',
+  '#6366f1',
+  '#ec4899',
 ];

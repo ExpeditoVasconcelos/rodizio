@@ -1,5 +1,6 @@
 import { Maximize2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Logo } from '../ui/Logo';
 
 interface Props {
   supported: boolean;
@@ -8,15 +9,16 @@ interface Props {
   onSkip: () => void;
 }
 
-/** Abertura limpa em fundo branco para ativar tela cheia no dispositivo móvel. */
-export function FullscreenGate({ supported, onEnter, onSkip }: Props) {
+/** Abertura minimalista com a logo vetorizada Barba de Urso para entrar em tela cheia. */
+export function FullscreenGate({ supported, logoUrl, onEnter, onSkip }: Props) {
   return (
     <div className="fixed inset-0 z-[90] grid place-items-center bg-white p-6" data-testid="fullscreen-gate">
       <div className="flex w-full max-w-sm flex-col items-center gap-4 text-center">
+        <Logo url={logoUrl} size={64} />
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900">Painel de Rodízio</h1>
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900">Barba de Urso</h1>
           <p className="mt-1 text-xs text-zinc-500">
-            Ative a tela cheia para exibir exclusivamente as duas tabelas de operação.
+            Ative a tela cheia para exibir exclusivamente as duas tabelas de rodízio.
           </p>
         </div>
 

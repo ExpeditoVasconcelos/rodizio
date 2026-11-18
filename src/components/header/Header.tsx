@@ -3,6 +3,8 @@ import type { StateSnapshot } from '../../../shared/types';
 import { formatClock } from '../../domain/format';
 import type { ConnectionStatus } from '../../services/connection/store';
 import { ConnectionBadge } from '../ui/ConnectionBadge';
+import { Logo } from '../ui/Logo';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 interface Props {
   snapshot: StateSnapshot | null;
@@ -18,7 +20,7 @@ interface Props {
   onResetDemo?: () => void;
 }
 
-/** Barra superior mínima em fundo branco: apenas identificação discreta e controles essenciais. */
+/** Barra superior mínima: logo Barba de Urso, alternância de tema (escuro/claro) e controles essenciais. */
 export function Header({
   snapshot,
   status,
@@ -36,9 +38,10 @@ export function Header({
     'grid h-8 w-8 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900';
 
   return (
-    <header className="flex shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4 py-2">
+    <header className="flex shrink-0 items-center gap-2.5 border-b border-zinc-200 bg-white px-4 py-2">
+      <Logo url={snapshot?.shop.logoUrl} size={26} />
       <div className="truncate text-xs font-bold tracking-[0.14em] text-zinc-900 uppercase">
-        {snapshot?.shop.name ?? 'RODÍZIO'}
+        {snapshot?.shop.name ?? 'BARBA DE URSO'}
       </div>
 
       {snapshot?.mode === 'demo' && (
@@ -83,6 +86,8 @@ export function Header({
       <div className="tabular text-xs font-semibold text-zinc-500" data-testid="clock">
         {formatClock(now)}
       </div>
+
+      <ThemeToggle />
 
       {fullscreenSupported && (
         <button

@@ -28,6 +28,7 @@ import { QueueColumn } from '../../components/queue-column/QueueColumn';
 import type { DropState } from '../../components/ui/BoardColumn';
 import { Button } from '../../components/ui/Button';
 import { Sheet } from '../../components/ui/Sheet';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { Toasts } from '../../components/ui/Toasts';
 import { WorkingColumn } from '../../components/working-column/WorkingColumn';
 import { decideDrop, originOf, type Zone } from '../../domain/board';
@@ -338,6 +339,7 @@ export default function TabletPanelPage() {
               Reiniciar demonstração
             </Button>
           )}
+          <ThemeToggle showLabel className="w-full justify-center border border-zinc-300 py-2.5" />
           <Button size="md" variant="secondary" icon={<RefreshCw size={16} />} onClick={() => location.reload()}>
             Recarregar painel
           </Button>

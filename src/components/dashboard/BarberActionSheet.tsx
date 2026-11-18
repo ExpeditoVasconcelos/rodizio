@@ -86,7 +86,7 @@ export function BarberActionSheet({ barber, onClose, onRun }: Props) {
             <div>
               <div
                 className="text-lg font-bold leading-tight"
-                style={{ color: barber.color ?? '#09090b' }}
+                style={{ color: barber.color ?? 'var(--color-zinc-900)' }}
               >
                 {barber.displayName}
               </div>
