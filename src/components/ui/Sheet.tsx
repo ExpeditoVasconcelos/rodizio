@@ -23,8 +23,8 @@ export function Sheet({ open, onClose, title, children, placement = 'bottom', cl
   return (
     <div
       className={cn(
-        'fixed inset-0 z-[70] flex bg-black/30',
-        placement === 'bottom' ? 'items-end justify-center' : 'items-center justify-center p-4',
+        'fixed inset-0 z-[70] flex bg-black/50 backdrop-blur-[2px]',
+        placement === 'bottom' ? 'items-end justify-center' : 'items-end justify-center p-0 sm:items-center sm:p-4',
       )}
       onPointerDown={(e) => e.target === e.currentTarget && onClose()}
     >
@@ -33,7 +33,9 @@ export function Sheet({ open, onClose, title, children, placement = 'bottom', cl
         aria-modal="true"
         className={cn(
           'animate-slide-up max-h-[90dvh] w-full overflow-y-auto border border-zinc-200 bg-white text-zinc-900 shadow-xl',
-          placement === 'bottom' ? 'max-w-lg rounded-t-2xl p-5 pb-7' : 'max-w-lg rounded-2xl p-6',
+          placement === 'bottom'
+            ? 'max-w-lg rounded-t-2xl p-5 pb-[calc(1.75rem+env(safe-area-inset-bottom))]'
+            : 'max-w-lg rounded-t-2xl p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:rounded-2xl sm:p-6',
           className,
         )}
       >

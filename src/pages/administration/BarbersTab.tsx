@@ -133,10 +133,10 @@ export function BarbersTab({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-5">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col gap-3 border-b border-zinc-200 pb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900">Profissionais</h1>
+          <h1 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl">Profissionais</h1>
           <p className="mt-0.5 text-xs text-zinc-500">
             Cadastre os colaboradores e defina a cor individual do nome de cada barbeiro.
           </p>
@@ -149,6 +149,7 @@ export function BarbersTab({
             onClick={() => void load()}
             icon={<RefreshCw size={14} className={loading ? 'animate-spin' : ''} />}
             title="Atualizar lista"
+            className="h-10 border border-zinc-200 sm:h-8 sm:border-0"
           >
             Atualizar
           </Button>
@@ -158,6 +159,7 @@ export function BarbersTab({
             onClick={openNew}
             icon={<Plus size={15} />}
             data-testid="admin-new-barber-btn"
+            className="h-10 flex-1 sm:h-8 sm:flex-initial"
           >
             Novo profissional
           </Button>
@@ -167,9 +169,9 @@ export function BarbersTab({
       {loading ? (
         <div className="p-8 text-center text-xs text-zinc-400">Carregando…</div>
       ) : barbers.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-200 p-10 text-center">
+        <div className="rounded-xl border border-dashed border-zinc-200 p-8 text-center sm:p-10">
           <p className="text-sm font-semibold text-zinc-700">Nenhum profissional cadastrado.</p>
-          <div className="mt-4 flex items-center justify-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <Button size="sm" variant="secondary" onClick={() => void load()} icon={<RefreshCw size={14} />}>
               Atualizar lista
             </Button>
@@ -185,39 +187,40 @@ export function BarbersTab({
               <div
                 key={b.id}
                 data-testid={`admin-barber-card-${b.displayName}`}
-                className={`flex flex-wrap items-center justify-between gap-4 px-5 py-3.5 ${
+                className={`flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 ${
                   b.active ? 'bg-white' : 'bg-zinc-50 opacity-60'
                 }`}
               >
-                <div className="flex items-center gap-3.5">
+                <div className="flex min-w-0 items-center gap-3 sm:gap-3.5">
                   <Avatar name={b.displayName} photoUrl={b.photoUrl} size={40} />
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       {b.color && (
-                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: b.color }} />
+                        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: b.color }} />
                       )}
                       <span
-                        className="text-base font-bold"
+                        className="truncate text-base font-bold"
                         style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                       >
                         {b.displayName}
                       </span>
-                      <span className="rounded bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-600 uppercase">
+                      <span className="shrink-0 rounded bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-600 uppercase">
                         {STATE_LABEL[b.state]}
                       </span>
                     </div>
-                    <div className="text-xs text-zinc-400">
+                    <div className="truncate text-xs text-zinc-400">
                       {b.fullName} · {b.totalAttendances} atendimento{b.totalAttendances === 1 ? '' : 's'}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5 sm:flex sm:shrink-0 sm:items-center">
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => onInspectHistory(b.id)}
                     icon={<History size={14} />}
+                    className="h-9 border border-zinc-200 px-2 sm:h-8 sm:border-0 sm:px-3"
                   >
                     Histórico
                   </Button>
@@ -227,6 +230,7 @@ export function BarbersTab({
                     onClick={() => toggleActiveQuick(b)}
                     icon={<Power size={14} />}
                     data-testid={`toggle-active-${b.displayName}`}
+                    className="h-9 border border-zinc-200 px-2 sm:h-8 sm:border-0 sm:px-3"
                   >
                     {b.active ? 'Desativar' : 'Ativar'}
                   </Button>
@@ -236,6 +240,7 @@ export function BarbersTab({
                     onClick={() => openEdit(b)}
                     icon={<Edit3 size={14} />}
                     data-testid={`edit-barber-${b.displayName}`}
+                    className="h-9 px-2 sm:h-8 sm:px-3"
                   >
                     Editar
                   </Button>

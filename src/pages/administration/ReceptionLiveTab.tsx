@@ -20,11 +20,14 @@ import { attendanceService } from '../../services/attendance/attendanceService';
 import { ApiError } from '../../services/http';
 import { queueService } from '../../services/queue/queueService';
 
+type MobileSection = 'all' | 'queue' | 'working' | 'resting';
+
 export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null }) {
   const now = useNow();
   const ops = useOperations();
   const [prefOpen, setPrefOpen] = useState(false);
   const [shiftBusy, setShiftBusy] = useState(false);
+  const [mobileSection, setMobileSection] = useState<MobileSection>('all');
 
   const barbers = snapshot?.barbers ?? [];
   const queue = useMemo(() => barbers.filter((b) => b.state === 'APTO'), [barbers]);
@@ -81,20 +84,24 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
     }
   };
 
+  const showQueue = mobileSection === 'all' || mobileSection === 'queue';
+  const showWorking = mobileSection === 'all' || mobileSection === 'working';
+  const showResting = mobileSection === 'all' || mobileSection === 'resting';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Cabeçalho da seção e controles de direcionamento */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-5">
+      <div className="flex flex-col gap-4 border-b border-zinc-200 pb-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900">Rodízio ao vivo</h1>
+          <h1 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl">Rodízio ao vivo</h1>
           <p className="mt-0.5 text-xs text-zinc-500">
             {snapshot?.shift
-              ? `Turno aberto às ${formatClock(snapshot.shift.openedAt)} · ${snapshot.stats.completedToday} atendimentos concluídos hoje`
+              ? `Turno aberto às ${formatClock(snapshot.shift.openedAt)} · ${snapshot.stats.completedToday} atendimento${snapshot.stats.completedToday === 1 ? '' : 's'} concluído${snapshot.stats.completedToday === 1 ? '' : 's'} hoje`
               : 'Turno encerrado'}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           {snapshot?.undo && snapshot.undo.expiresAt > now && (
             <Button
               size="sm"
@@ -102,19 +109,11 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
               onClick={handleUndo}
               icon={<Undo2 size={14} />}
               title={`Desfazer: ${snapshot.undo.barberName} ${operationPhrase(snapshot.undo.operation)}`}
+              className="h-10 w-full sm:h-8 sm:w-auto"
             >
               Desfazer ({snapshot.undo.barberName})
             </Button>
           )}
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setPrefOpen(true)}
-            disabled={!snapshot?.shift}
-            data-testid="reception-preference-btn"
-          >
-            Cliente com preferência
-          </Button>
           <Button
             size="sm"
             variant="primary"
@@ -122,27 +121,86 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
             disabled={!snapshot?.shift}
             icon={<Play size={14} />}
             data-testid="reception-call-next"
+            className="h-11 w-full sm:order-2 sm:h-8 sm:w-auto"
           >
             {nextBarber ? `Chamar próximo (${nextBarber.displayName})` : 'Chamar próximo'}
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={shiftBusy}
-            onClick={toggleShift}
-            icon={<Power size={14} />}
-            data-testid="reception-shift-toggle"
-            className="border border-zinc-200"
-          >
-            {snapshot?.shift ? 'Encerrar turno' : 'Abrir turno'}
-          </Button>
+          <div className="grid grid-cols-2 gap-2 sm:contents">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setPrefOpen(true)}
+              disabled={!snapshot?.shift}
+              data-testid="reception-preference-btn"
+              className="h-10 w-full sm:order-1 sm:h-8 sm:w-auto"
+            >
+              <span className="sm:hidden">Preferência</span>
+              <span className="hidden sm:inline">Cliente com preferência</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={shiftBusy}
+              onClick={toggleShift}
+              icon={<Power size={14} />}
+              data-testid="reception-shift-toggle"
+              className="h-10 w-full border border-zinc-200 sm:order-3 sm:h-8 sm:w-auto"
+            >
+              {snapshot?.shift ? 'Encerrar turno' : 'Abrir turno'}
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* Filtro rápido por seção no Mobile / Tablet (< lg) */}
+      <div className="scroll-x -mx-4 flex items-center gap-1.5 px-4 sm:-mx-6 sm:px-6 lg:hidden">
+        {(
+          [
+            { id: 'all', label: 'Tudo', count: barbers.length },
+            { id: 'queue', label: 'Na Fila', count: queue.length, dot: '#0d9488' },
+            { id: 'working', label: 'Atendendo', count: working.length, dot: '#d97706' },
+            { id: 'resting', label: 'Fora', count: resting.length },
+          ] as { id: MobileSection; label: string; count: number; dot?: string }[]
+        ).map((item) => {
+          const active = mobileSection === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setMobileSection(item.id)}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                active
+                  ? 'border-zinc-900 bg-zinc-900 text-white'
+                  : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              {item.dot && (
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: item.dot }}
+                />
+              )}
+              <span>{item.label}</span>
+              <span
+                className={`tabular rounded-full px-1.5 py-0.2 text-[0.65rem] ${
+                  active ? 'bg-white/20 text-white' : 'bg-zinc-200/70 text-zinc-600'
+                }`}
+              >
+                {item.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Duas tabelas principais: NA FILA e TRABALHANDO */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
         {/* Tabela NA FILA */}
-        <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <section
+          className={`overflow-hidden rounded-xl border border-zinc-200 bg-white ${
+            showQueue ? 'block' : 'hidden lg:block'
+          }`}
+        >
           <div className="h-[2px] w-full bg-[#0d9488]" />
           <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
             <div className="flex items-center gap-2">
@@ -162,40 +220,48 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                 const wait = b.queueEnteredAt ? (now - b.queueEnteredAt) / 1000 : 0;
                 const isFirst = b.position === 1;
                 return (
-                  <div key={b.id} className="flex items-center gap-3 px-4 py-3">
-                    <span
-                      className={`tabular grid h-7 w-7 shrink-0 place-items-center rounded text-xs font-bold ${isFirst ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600'
+                  <div
+                    key={b.id}
+                    className="flex flex-col gap-2.5 px-3.5 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4"
+                  >
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
+                      <span
+                        className={`tabular grid h-7 w-7 shrink-0 place-items-center rounded text-xs font-bold ${
+                          isFirst ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600'
                         }`}
-                    >
-                      {b.position}º
-                    </span>
-                    <Avatar name={b.displayName} photoUrl={b.photoUrl} size={34} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="truncate text-sm font-bold"
-                          style={{ color: b.color ?? 'var(--color-zinc-900)' }}
-                        >
-                          {b.displayName}
-                        </span>
-                        {isFirst && (
-                          <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[0.6rem] font-semibold text-white uppercase">
-                            Próximo
+                      >
+                        {b.position}º
+                      </span>
+                      <Avatar name={b.displayName} photoUrl={b.photoUrl} size={34} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="truncate text-sm font-bold"
+                            style={{ color: b.color ?? 'var(--color-zinc-900)' }}
+                          >
+                            {b.displayName}
                           </span>
-                        )}
+                          {isFirst && (
+                            <span className="shrink-0 rounded bg-zinc-900 px-1.5 py-0.5 text-[0.6rem] font-semibold text-white uppercase">
+                              Próximo
+                            </span>
+                          )}
+                        </div>
+                        <div className="tabular text-xs text-zinc-400">Espera {formatDuration(wait)}</div>
                       </div>
-                      <div className="tabular text-xs text-zinc-400">Espera {formatDuration(wait)}</div>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5 sm:shrink-0 sm:gap-1">
                       <Button
                         size="sm"
                         variant="ghost"
                         disabled={ops.pending.has(b.id)}
                         onClick={() => void ops.run(b.id, () => queueService.pause(b.id))}
                         title="Pausa"
+                        className="h-9 border border-zinc-200 px-2.5 sm:h-8 sm:border-0 sm:px-2"
                       >
                         <Pause size={13} />
+                        <span className="text-[0.72rem] sm:hidden">Pausa</span>
                       </Button>
                       <Button
                         size="sm"
@@ -203,14 +269,17 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                         disabled={ops.pending.has(b.id)}
                         onClick={() => void ops.run(b.id, () => queueService.clockOut(b.id))}
                         title="Encerrar expediente"
+                        className="h-9 border border-zinc-200 px-2.5 sm:h-8 sm:border-0 sm:px-2"
                       >
                         <LogOut size={13} />
+                        <span className="text-[0.72rem] sm:hidden">Sair</span>
                       </Button>
                       <Button
                         size="sm"
                         variant="primary"
                         disabled={ops.pending.has(b.id)}
                         onClick={() => void ops.run(b.id, () => attendanceService.start(b.id))}
+                        className="h-9 flex-1 sm:h-8 sm:flex-initial"
                       >
                         Atender
                       </Button>
@@ -223,7 +292,11 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
         </section>
 
         {/* Tabela TRABALHANDO */}
-        <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <section
+          className={`overflow-hidden rounded-xl border border-zinc-200 bg-white ${
+            showWorking ? 'block' : 'hidden lg:block'
+          }`}
+        >
           <div className="h-[2px] w-full bg-[#d97706]" />
           <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
             <div className="flex items-center gap-2">
@@ -243,34 +316,41 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                 const att = b.attendance;
                 const elapsed = att ? (now - att.startedAt) / 1000 : 0;
                 return (
-                  <div key={b.id} className="flex items-center gap-3 px-4 py-3">
-                    <Avatar name={b.displayName} photoUrl={b.photoUrl} size={34} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="truncate text-sm font-bold"
-                          style={{ color: b.color ?? 'var(--color-zinc-900)' }}
-                        >
-                          {b.displayName}
-                        </span>
-                        {att && (
-                          <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-zinc-600 uppercase">
-                            {KIND_LABEL[att.kind]}
+                  <div
+                    key={b.id}
+                    className="flex flex-col gap-2.5 px-3.5 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4"
+                  >
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <Avatar name={b.displayName} photoUrl={b.photoUrl} size={34} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="truncate text-sm font-bold"
+                            style={{ color: b.color ?? 'var(--color-zinc-900)' }}
+                          >
+                            {b.displayName}
                           </span>
-                        )}
+                          {att && (
+                            <span className="shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-zinc-600 uppercase">
+                              {KIND_LABEL[att.kind]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-zinc-400">
+                          Início {att ? formatClock(att.startedAt) : '--:--'}
+                        </div>
                       </div>
-                      <div className="text-xs text-zinc-400">
-                        Início {att ? formatClock(att.startedAt) : '--:--'}
+                      <div className="tabular shrink-0 text-sm font-bold text-zinc-900">
+                        {formatDuration(elapsed)}
                       </div>
                     </div>
-
-                    <div className="tabular text-sm font-bold text-zinc-900">{formatDuration(elapsed)}</div>
 
                     <Button
                       size="sm"
                       variant="secondary"
                       disabled={ops.pending.has(b.id)}
                       onClick={() => void ops.run(b.id, () => attendanceService.finish(b.id, b.attendance?.id))}
+                      className="h-9 w-full sm:h-8 sm:w-auto sm:shrink-0"
                     >
                       Finalizar
                     </Button>
@@ -283,7 +363,11 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
       </div>
 
       {/* Fora da fila (Pausa / Fora do expediente) */}
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <section
+        className={`overflow-hidden rounded-xl border border-zinc-200 bg-white ${
+          showResting ? 'block' : 'hidden lg:block'
+        }`}
+      >
         <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
           <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-600 uppercase">
             Pausa e fora do expediente ({resting.length})
@@ -294,12 +378,15 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
         ) : (
           <div className="divide-y divide-zinc-100">
             {resting.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
-                <div className="flex items-center gap-3">
+              <div
+                key={b.id}
+                className="flex flex-col gap-2.5 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4 sm:py-2.5"
+              >
+                <div className="flex min-w-0 items-center gap-3">
                   <Avatar name={b.displayName} photoUrl={b.photoUrl} size={32} />
-                  <div>
+                  <div className="min-w-0">
                     <span
-                      className="text-sm font-bold"
+                      className="truncate text-sm font-bold"
                       style={{ color: b.color ?? 'var(--color-zinc-900)' }}
                     >
                       {b.displayName}
@@ -307,13 +394,14 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                     <span className="ml-2 text-xs text-zinc-400">{STATE_LABEL[b.state]}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2 sm:shrink-0 sm:gap-1.5">
                   {b.state === 'PAUSA' && (
                     <Button
                       size="sm"
                       variant="ghost"
                       disabled={ops.pending.has(b.id) || !snapshot?.shift}
                       onClick={() => void ops.run(b.id, () => queueService.clockOut(b.id))}
+                      className="h-9 border border-zinc-200 sm:h-8 sm:border-0"
                     >
                       Encerrar
                     </Button>
@@ -328,6 +416,7 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                       )
                     }
                     icon={<UserCheck size={14} />}
+                    className="h-9 flex-1 sm:h-8 sm:flex-initial"
                   >
                     {b.state === 'PAUSA' ? 'Voltar à fila' : 'Estou disponível'}
                   </Button>
@@ -361,10 +450,11 @@ export function ReceptionLiveTab({ snapshot }: { snapshot: StateSnapshot | null 
                 type="button"
                 onClick={() => selectPreferredBarber(b)}
                 data-testid={`pref-barber-${b.displayName}`}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${available
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
+                  available
                     ? 'border-zinc-200 bg-white hover:border-zinc-900'
                     : 'border-zinc-100 bg-zinc-50 opacity-60'
-                  }`}
+                }`}
               >
                 <Avatar name={b.displayName} photoUrl={b.photoUrl} size={38} />
                 <div className="min-w-0 flex-1">

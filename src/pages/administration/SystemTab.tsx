@@ -126,17 +126,17 @@ export function SystemTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <div className="border-b border-zinc-200 pb-5">
-        <h1 className="text-xl font-bold tracking-tight text-zinc-900">Sistema, Rede e Backup</h1>
+        <h1 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl">Sistema, Rede e Backup</h1>
         <p className="mt-0.5 text-xs text-zinc-500">
           Conecte o dispositivo móvel, configure o estabelecimento e gerencie segurança e backups.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
         {/* Acesso pelo dispositivo móvel */}
-        <section className="rounded-xl border border-zinc-200 bg-white p-5">
+        <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
           <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">
             Acesso pelo tablet / celular
           </h2>
@@ -149,7 +149,7 @@ export function SystemTab() {
               <QRCodeSVG value={tabletUrl} size={124} level="M" />
             </div>
 
-            <div className="min-w-0 flex-1 space-y-2">
+            <div className="w-full min-w-0 flex-1 space-y-2">
               <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
                 <div className="text-[0.65rem] font-semibold text-zinc-400 uppercase">Endereço do painel</div>
                 <div className="mt-0.5 break-all font-mono text-sm font-bold text-zinc-900" data-testid="lan-tablet-url">
@@ -160,7 +160,7 @@ export function SystemTab() {
                   variant="secondary"
                   onClick={() => void copyUrl(tabletUrl)}
                   icon={<Copy size={13} />}
-                  className="mt-2"
+                  className="mt-2.5 h-9 w-full sm:mt-2 sm:h-8 sm:w-auto"
                 >
                   Copiar endereço
                 </Button>
@@ -170,10 +170,10 @@ export function SystemTab() {
         </section>
 
         {/* Configurações do estabelecimento */}
-        <section className="rounded-xl border border-zinc-200 bg-white p-5">
+        <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
           <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">Estabelecimento</h2>
 
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <Logo url={info?.settings.logoUrl} size={40} />
             <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50">
               <Camera size={14} /> Logotipo
@@ -221,6 +221,7 @@ export function SystemTab() {
               disabled={savingSettings}
               icon={<Save size={14} />}
               data-testid="settings-save-btn"
+              className="h-10 w-full sm:h-8 sm:w-auto"
             >
               {savingSettings ? 'Salvando…' : 'Salvar'}
             </Button>
@@ -228,7 +229,7 @@ export function SystemTab() {
         </section>
 
         {/* Segurança: PIN da recepção */}
-        <section className="rounded-xl border border-zinc-200 bg-white p-5">
+        <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
           <form onSubmit={handleChangePin} className="space-y-3">
             <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">
               Segurança · Alterar PIN da recepção
@@ -236,7 +237,7 @@ export function SystemTab() {
             <p className="text-xs text-zinc-500">
               O PIN protege o acesso administrativo ao cadastro, turnos, histórico e configurações.
             </p>
-            <div className="grid grid-cols-2 gap-2.5 pt-1">
+            <div className="grid grid-cols-1 gap-2.5 pt-1 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-zinc-600">PIN atual</label>
                 <input
@@ -262,15 +263,21 @@ export function SystemTab() {
                 />
               </div>
             </div>
-            <Button type="submit" size="sm" variant="secondary" disabled={savingPin || newPin.length < 4}>
+            <Button
+              type="submit"
+              size="sm"
+              variant="secondary"
+              disabled={savingPin || newPin.length < 4}
+              className="h-10 w-full sm:h-8 sm:w-auto"
+            >
               {savingPin ? 'Alterando…' : 'Atualizar PIN'}
             </Button>
           </form>
         </section>
 
         {/* Backups */}
-        <section className="rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="flex items-center justify-between">
+        <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">Backups (SQLite)</h2>
             <Button
               size="sm"

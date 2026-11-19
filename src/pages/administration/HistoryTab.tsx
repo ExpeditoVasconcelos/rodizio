@@ -99,22 +99,23 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-5">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col gap-3 border-b border-zinc-200 pb-5 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900">Histórico e Auditoria</h1>
+          <h1 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl">Histórico e Auditoria</h1>
           <p className="mt-0.5 text-xs text-zinc-500">
             Consulte os atendimentos realizados e o registro de operações.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="grid grid-cols-2 rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 sm:inline-flex">
             <button
               type="button"
               onClick={() => setView('attendances')}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${view === 'attendances' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
-                }`}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                view === 'attendances' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
+              }`}
             >
               Atendimentos ({total})
             </button>
@@ -122,29 +123,44 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
               type="button"
               onClick={() => setView('audit')}
               data-testid="tab-audit-btn"
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${view === 'audit' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
-                }`}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                view === 'audit' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
+              }`}
             >
               Auditoria ({auditTotal})
             </button>
           </div>
 
-          <Button size="sm" variant="ghost" onClick={load} icon={<RefreshCw size={14} />}>
-            Atualizar
-          </Button>
-          {view === 'attendances' && rows.length > 0 && (
-            <Button size="sm" variant="secondary" onClick={exportCsv} icon={<Download size={14} />}>
-              CSV
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={load}
+              icon={<RefreshCw size={14} />}
+              className="h-9 flex-1 border border-zinc-200 sm:h-8 sm:flex-initial sm:border-0"
+            >
+              Atualizar
             </Button>
-          )}
+            {view === 'attendances' && rows.length > 0 && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={exportCsv}
+                icon={<Download size={14} />}
+                className="h-9 flex-1 sm:h-8 sm:flex-initial"
+              >
+                CSV
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {view === 'attendances' ? (
         <>
-          {/* Filtros */}
-          <section className="flex flex-wrap items-end gap-3 rounded-xl border border-zinc-200 bg-zinc-50/70 p-4">
-            <div className="min-w-[180px] flex-1">
+          {/* Filtros responsivos */}
+          <section className="grid grid-cols-1 gap-3 rounded-xl border border-zinc-200 bg-zinc-50/70 p-3.5 sm:p-4 lg:flex lg:flex-wrap lg:items-end">
+            <div className="lg:min-w-[180px] lg:flex-1">
               <label className="mb-1 block text-xs font-semibold text-zinc-600">Profissional</label>
               <select
                 value={barberId ?? ''}
@@ -161,24 +177,26 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
               </select>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-zinc-600">De</label>
-              <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="field" />
+            <div className="grid grid-cols-2 gap-2.5 lg:contents">
+              <div className="min-w-0">
+                <label className="mb-1 block text-xs font-semibold text-zinc-600">De</label>
+                <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="field" />
+              </div>
+
+              <div className="min-w-0">
+                <label className="mb-1 block text-xs font-semibold text-zinc-600">Até</label>
+                <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="field" />
+              </div>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-zinc-600">Até</label>
-              <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="field" />
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              <Button size="sm" variant="secondary" onClick={() => setQuickRange(1)}>
+            <div className="grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap">
+              <Button size="sm" variant="secondary" onClick={() => setQuickRange(1)} className="h-9 sm:h-8">
                 Hoje
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => setQuickRange(7)}>
+              <Button size="sm" variant="secondary" onClick={() => setQuickRange(7)} className="h-9 sm:h-8">
                 7 dias
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => setQuickRange(30)}>
+              <Button size="sm" variant="secondary" onClick={() => setQuickRange(30)} className="h-9 sm:h-8">
                 30 dias
               </Button>
               <Button
@@ -188,6 +206,7 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
                   setQuickRange('all');
                   setBarberId(undefined);
                 }}
+                className="h-9 border border-zinc-200 sm:h-8 sm:border-0"
               >
                 Limpar
               </Button>
@@ -202,7 +221,50 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
                   Resumo por profissional
                 </h2>
               </div>
-              <div className="overflow-x-auto">
+
+              {/* Mobile: cards de resumo */}
+              <div className="divide-y divide-zinc-100 md:hidden">
+                {summary.map((s) => (
+                  <div key={s.barberId} className="space-y-2.5 px-4 py-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className="truncate text-sm font-bold"
+                        style={{ color: colorMap.get(s.barberId) ?? 'var(--color-zinc-900)' }}
+                      >
+                        {s.barberName}
+                      </span>
+                      <span className="tabular shrink-0 rounded bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-800">
+                        {s.finished} finalizado{s.finished === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 rounded-lg bg-zinc-50 px-2.5 py-2 text-center">
+                      <div>
+                        <div className="text-[0.62rem] font-medium text-zinc-400 uppercase">Rodízio</div>
+                        <div className="tabular text-xs font-semibold text-zinc-800">{s.rotation}</div>
+                      </div>
+                      <div>
+                        <div className="text-[0.62rem] font-medium text-zinc-400 uppercase">Pref.</div>
+                        <div className="tabular text-xs font-semibold text-zinc-800">{s.specific}</div>
+                      </div>
+                      <div>
+                        <div className="text-[0.62rem] font-medium text-zinc-400 uppercase">Média</div>
+                        <div className="tabular text-xs font-semibold text-zinc-800">
+                          {formatMinutes(s.avgDurationSeconds)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[0.62rem] font-medium text-zinc-400 uppercase">Total</div>
+                        <div className="tabular text-xs font-semibold text-zinc-800">
+                          {formatMinutes(s.totalSeconds)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: tabela de resumo */}
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full text-left text-xs">
                   <thead className="border-b border-zinc-200 bg-zinc-50 font-semibold text-zinc-500">
                     <tr>
@@ -248,45 +310,83 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
             ) : rows.length === 0 ? (
               <div className="p-8 text-center text-xs text-zinc-400">Nenhum atendimento encontrado.</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs" data-testid="history-table">
-                  <thead className="border-b border-zinc-200 bg-zinc-50 font-semibold text-zinc-500">
-                    <tr>
-                      <th className="px-4 py-2.5">#</th>
-                      <th className="px-4 py-2.5">Profissional</th>
-                      <th className="px-4 py-2.5">Tipo</th>
-                      <th className="px-4 py-2.5">Pos.</th>
-                      <th className="px-4 py-2.5">Início</th>
-                      <th className="px-4 py-2.5">Término</th>
-                      <th className="px-4 py-2.5">Duração</th>
-                      <th className="px-4 py-2.5">Situação</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {rows.map((r) => (
-                      <tr key={r.id}>
-                        <td className="tabular px-4 py-2.5 text-zinc-400">#{r.id}</td>
-                        <td
-                          className="px-4 py-2.5 text-sm font-bold"
-                          style={{ color: colorMap.get(r.barberId) ?? 'var(--color-zinc-900)' }}
-                        >
-                          {r.barberName}
-                        </td>
-                        <td className="px-4 py-2.5 text-zinc-600">{KIND_LABEL[r.kind]}</td>
-                        <td className="tabular px-4 py-2.5 text-zinc-500">
-                          {r.queuePosition ? `${r.queuePosition}º` : '—'}
-                        </td>
-                        <td className="tabular px-4 py-2.5 text-zinc-600">{formatDateTime(r.startedAt)}</td>
-                        <td className="tabular px-4 py-2.5 text-zinc-600">{formatDateTime(r.endedAt)}</td>
-                        <td className="tabular px-4 py-2.5 font-semibold text-zinc-900">
+              <>
+                {/* Mobile: cards de atendimentos */}
+                <div className="divide-y divide-zinc-100 md:hidden">
+                  {rows.map((r) => (
+                    <div key={r.id} className="space-y-1.5 px-4 py-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="tabular text-xs text-zinc-400">#{r.id}</span>
+                          <span
+                            className="truncate text-sm font-bold"
+                            style={{ color: colorMap.get(r.barberId) ?? 'var(--color-zinc-900)' }}
+                          >
+                            {r.barberName}
+                          </span>
+                        </div>
+                        <span className="tabular shrink-0 text-sm font-bold text-zinc-900">
                           {formatDuration(r.durationSeconds)}
-                        </td>
-                        <td className="px-4 py-2.5 text-zinc-500">{STATUS_LABEL[r.status] ?? r.status}</td>
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-zinc-600">
+                          {KIND_LABEL[r.kind]}
+                          {r.queuePosition ? ` · ${r.queuePosition}º` : ''}
+                        </span>
+                        <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[0.65rem] font-medium text-zinc-500">
+                          {STATUS_LABEL[r.status] ?? r.status}
+                        </span>
+                      </div>
+                      <div className="tabular flex flex-wrap gap-x-3 gap-y-0.5 text-[0.72rem] text-zinc-400">
+                        <span>Início: {formatDateTime(r.startedAt)}</span>
+                        <span>Término: {formatDateTime(r.endedAt)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop: tabela completa */}
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full text-left text-xs" data-testid="history-table">
+                    <thead className="border-b border-zinc-200 bg-zinc-50 font-semibold text-zinc-500">
+                      <tr>
+                        <th className="px-4 py-2.5">#</th>
+                        <th className="px-4 py-2.5">Profissional</th>
+                        <th className="px-4 py-2.5">Tipo</th>
+                        <th className="px-4 py-2.5">Pos.</th>
+                        <th className="px-4 py-2.5">Início</th>
+                        <th className="px-4 py-2.5">Término</th>
+                        <th className="px-4 py-2.5">Duração</th>
+                        <th className="px-4 py-2.5">Situação</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                      {rows.map((r) => (
+                        <tr key={r.id}>
+                          <td className="tabular px-4 py-2.5 text-zinc-400">#{r.id}</td>
+                          <td
+                            className="px-4 py-2.5 text-sm font-bold"
+                            style={{ color: colorMap.get(r.barberId) ?? 'var(--color-zinc-900)' }}
+                          >
+                            {r.barberName}
+                          </td>
+                          <td className="px-4 py-2.5 text-zinc-600">{KIND_LABEL[r.kind]}</td>
+                          <td className="tabular px-4 py-2.5 text-zinc-500">
+                            {r.queuePosition ? `${r.queuePosition}º` : '—'}
+                          </td>
+                          <td className="tabular px-4 py-2.5 text-zinc-600">{formatDateTime(r.startedAt)}</td>
+                          <td className="tabular px-4 py-2.5 text-zinc-600">{formatDateTime(r.endedAt)}</td>
+                          <td className="tabular px-4 py-2.5 font-semibold text-zinc-900">
+                            {formatDuration(r.durationSeconds)}
+                          </td>
+                          <td className="px-4 py-2.5 text-zinc-500">{STATUS_LABEL[r.status] ?? r.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </section>
         </>
@@ -295,42 +395,86 @@ export function HistoryTab({ initialBarberId }: { initialBarberId?: number }) {
           <div className="border-b border-zinc-200 px-4 py-3">
             <h2 className="text-xs font-bold tracking-[0.12em] text-zinc-900 uppercase">Registro de auditoria</h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs" data-testid="audit-table">
-              <thead className="border-b border-zinc-200 bg-zinc-50 font-semibold text-zinc-500">
-                <tr>
-                  <th className="px-4 py-2.5">ID</th>
-                  <th className="px-4 py-2.5">Data / Hora</th>
-                  <th className="px-4 py-2.5">Operação</th>
-                  <th className="px-4 py-2.5">Profissional</th>
-                  <th className="px-4 py-2.5">Origem</th>
-                  <th className="px-4 py-2.5">Detalhes</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
+
+          {auditRows.length === 0 ? (
+            <div className="p-8 text-center text-xs text-zinc-400">Nenhum evento de auditoria registrado.</div>
+          ) : (
+            <>
+              {/* Mobile: cards de auditoria */}
+              <div className="divide-y divide-zinc-100 md:hidden">
                 {auditRows.map((a) => (
-                  <tr key={a.id}>
-                    <td className="tabular px-4 py-2 text-zinc-400">#{a.id}</td>
-                    <td className="tabular px-4 py-2 text-zinc-600">{formatDateTime(a.createdAt)}</td>
-                    <td className="px-4 py-2 font-mono font-semibold text-zinc-800">
-                      {a.operation}
-                      {a.undone && <span className="ml-1.5 text-[0.65rem] text-zinc-400">(desfeita)</span>}
-                    </td>
-                    <td
-                      className="px-4 py-2 font-bold"
-                      style={{ color: (a.barberId ? colorMap.get(a.barberId) : null) ?? 'var(--color-zinc-900)' }}
-                    >
-                      {a.barberName ?? '—'}
-                    </td>
-                    <td className="px-4 py-2 text-zinc-500">{a.actor}</td>
-                    <td className="px-4 py-2 font-mono text-zinc-400">
-                      {a.info ? JSON.stringify(a.info) : '—'}
-                    </td>
-                  </tr>
+                  <div key={a.id} className="space-y-1.5 px-4 py-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="tabular text-xs text-zinc-400">#{a.id}</span>
+                        <span className="truncate font-mono text-xs font-semibold text-zinc-800">
+                          {a.operation}
+                        </span>
+                        {a.undone && <span className="text-[0.65rem] text-zinc-400">(desfeita)</span>}
+                      </div>
+                      <span className="tabular shrink-0 text-[0.7rem] text-zinc-400">
+                        {formatDateTime(a.createdAt)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span
+                        className="truncate font-bold"
+                        style={{ color: (a.barberId ? colorMap.get(a.barberId) : null) ?? 'var(--color-zinc-900)' }}
+                      >
+                        {a.barberName ?? '—'}
+                      </span>
+                      <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[0.65rem] text-zinc-500">
+                        {a.actor}
+                      </span>
+                    </div>
+                    {a.info && (
+                      <div className="break-all rounded bg-zinc-50 px-2 py-1 font-mono text-[0.68rem] text-zinc-400">
+                        {JSON.stringify(a.info)}
+                      </div>
+                    )}
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+
+              {/* Desktop: tabela de auditoria */}
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full text-left text-xs" data-testid="audit-table">
+                  <thead className="border-b border-zinc-200 bg-zinc-50 font-semibold text-zinc-500">
+                    <tr>
+                      <th className="px-4 py-2.5">ID</th>
+                      <th className="px-4 py-2.5">Data / Hora</th>
+                      <th className="px-4 py-2.5">Operação</th>
+                      <th className="px-4 py-2.5">Profissional</th>
+                      <th className="px-4 py-2.5">Origem</th>
+                      <th className="px-4 py-2.5">Detalhes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {auditRows.map((a) => (
+                      <tr key={a.id}>
+                        <td className="tabular px-4 py-2 text-zinc-400">#{a.id}</td>
+                        <td className="tabular px-4 py-2 text-zinc-600">{formatDateTime(a.createdAt)}</td>
+                        <td className="px-4 py-2 font-mono font-semibold text-zinc-800">
+                          {a.operation}
+                          {a.undone && <span className="ml-1.5 text-[0.65rem] text-zinc-400">(desfeita)</span>}
+                        </td>
+                        <td
+                          className="px-4 py-2 font-bold"
+                          style={{ color: (a.barberId ? colorMap.get(a.barberId) : null) ?? 'var(--color-zinc-900)' }}
+                        >
+                          {a.barberName ?? '—'}
+                        </td>
+                        <td className="px-4 py-2 text-zinc-500">{a.actor}</td>
+                        <td className="px-4 py-2 font-mono text-zinc-400">
+                          {a.info ? JSON.stringify(a.info) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </section>
       )}
     </div>

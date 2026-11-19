@@ -32,8 +32,8 @@ export function PinLoginView({ onSuccess }: { onSuccess: (mustChangePin: boolean
   };
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-zinc-50 p-6">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="grid min-h-dvh place-items-center bg-zinc-50 p-4 sm:p-6">
+      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex items-center justify-between">
           <Button size="sm" variant="ghost" onClick={() => navigate('/')} icon={<ArrowLeft size={14} />}>
             Início
@@ -69,7 +69,7 @@ export function PinLoginView({ onSuccess }: { onSuccess: (mustChangePin: boolean
                 key={d}
                 type="button"
                 onClick={() => appendDigit(d)}
-                className="h-10 rounded-lg border border-zinc-200 bg-white text-sm font-semibold text-zinc-900 hover:bg-zinc-50 active:bg-zinc-100"
+                className="h-12 rounded-lg border border-zinc-200 bg-white text-base font-semibold text-zinc-900 hover:bg-zinc-50 active:bg-zinc-100 sm:h-10 sm:text-sm"
               >
                 {d}
               </button>
@@ -77,14 +77,14 @@ export function PinLoginView({ onSuccess }: { onSuccess: (mustChangePin: boolean
             <button
               type="button"
               onClick={() => setPin('')}
-              className="h-10 rounded-lg border border-zinc-200 bg-white text-[0.7rem] font-semibold text-zinc-500 hover:bg-zinc-50"
+              className="h-12 rounded-lg border border-zinc-200 bg-white text-xs font-semibold text-zinc-500 hover:bg-zinc-50 sm:h-10 sm:text-[0.7rem]"
             >
               Limpar
             </button>
             <button
               type="button"
               onClick={() => appendDigit('0')}
-              className="h-10 rounded-lg border border-zinc-200 bg-white text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+              className="h-12 rounded-lg border border-zinc-200 bg-white text-base font-semibold text-zinc-900 hover:bg-zinc-50 sm:h-10 sm:text-sm"
             >
               0
             </button>
@@ -92,9 +92,9 @@ export function PinLoginView({ onSuccess }: { onSuccess: (mustChangePin: boolean
               type="button"
               onClick={() => setPin((p) => p.slice(0, -1))}
               aria-label="Apagar"
-              className="grid h-10 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+              className="grid h-12 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 sm:h-10"
             >
-              <Delete size={16} />
+              <Delete size={17} />
             </button>
           </div>
 
@@ -104,7 +104,7 @@ export function PinLoginView({ onSuccess }: { onSuccess: (mustChangePin: boolean
             variant="primary"
             disabled={busy || pin.length < 4}
             data-testid="admin-pin-submit"
-            className="w-full"
+            className="h-11 w-full sm:h-10"
           >
             {busy ? 'Verificando…' : 'Entrar'}
           </Button>

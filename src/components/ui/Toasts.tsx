@@ -4,7 +4,7 @@ export function Toasts() {
   const toasts = useToasts();
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-14 z-[80] flex flex-col items-center gap-2 px-4"
+      className="pointer-events-none fixed inset-x-0 top-16 z-[80] flex flex-col items-center gap-2 px-4 md:top-14"
       aria-live="assertive"
     >
       {toasts.map((t) => (
